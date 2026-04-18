@@ -68,6 +68,7 @@ Opaque 32-byte random session ID stored in a session cookie:
 Gated by the `ADMIN_SECRET` env var as a query-string match. Not a user-facing feature — only dad uses this.
 
 Two modes:
+
 - **New user:** enter a username + emoji → server creates user in KV → immediately triggers WebAuthn registration on the current device → stores credential.
 - **Add device to existing user:** select an existing user → registration ceremony on the new device.
 
@@ -123,11 +124,13 @@ Post-login landing page. v1 shows:
 **Left rail — brushes:** Pen, Marker, Pencil, Eraser. Each is a `perfect-freehand` config preset (smoothing, taper start/end, thinning, streamline). Pressure from Apple Pencil feeds stroke width. Eraser is destination-out composite.
 
 **Right rail — stroke controls:**
+
 - Size slider (1–60 px)
 - Opacity slider (10–100%)
 - Color palette: 12 preset colors + a color wheel input for custom picks. "Recently used" strip below the palette.
 
 **Drawing engine:**
+
 - HTML Canvas 2D, one on-screen canvas.
 - `perfect-freehand` generates the outline polygon for each stroke; we fill it with the current color + opacity.
 - Pointer Events API captures finger + Apple Pencil. `pointerType === "pen"` uses reported pressure; `"touch"` and `"mouse"` use a constant 0.5 pressure.
@@ -135,6 +138,7 @@ Post-login landing page. v1 shows:
 **Undo/redo:** an in-memory stack of stroke operations (not pixel snapshots). On undo, we re-rasterize from the stroke list. Resets on page reload — acceptable, since autosave preserves the canonical stroke list on the server.
 
 **Autosave:**
+
 - Debounce 2 seconds after the last pointer-up.
 - POST `/api/drawings/[id]` with `{ title, strokes }`.
 - Server writes `drawings/<userId>/<drawingId>.json` and re-rasterizes a PNG thumbnail to `drawings/<userId>/<drawingId>.png`.
@@ -147,10 +151,12 @@ Tap **Save to Photos** → client rasterizes the canvas to a high-res PNG (full 
 ### 8.4 Data model
 
 Each drawing has two artifacts in Blob:
+
 - `drawings/<userId>/<drawingId>.json` — `{ id, userId, title, createdAt, updatedAt, strokes: Stroke[] }`
 - `drawings/<userId>/<drawingId>.png` — rasterized thumbnail (~400×533 for gallery display; full-res is regenerated for exports)
 
 A lightweight index per user lives in KV for gallery listing without scanning Blob:
+
 - `user:<userId>:drawings` → Sorted set of drawingIds by `updatedAt` desc.
 - `drawing:<drawingId>` → `{ id, userId, title, createdAt, updatedAt, blobJsonUrl, blobPngUrl }`
 
@@ -158,7 +164,7 @@ A lightweight index per user lives in KV for gallery listing without scanning Bl
 
 ```ts
 type Stroke = {
-  brush: "pen" | "marker" | "pencil" | "eraser";
+  brush: 'pen' | 'marker' | 'pencil' | 'eraser';
   size: number;
   opacity: number;
   color: string; // hex
@@ -215,14 +221,14 @@ middleware.ts
 
 ## 10. Environment variables
 
-| Var | Purpose |
-|---|---|
-| `ADMIN_SECRET` | Gates `/register` + related APIs. |
+| Var                                                  | Purpose                                                                                                                                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ADMIN_SECRET`                                       | Gates `/register` + related APIs.                                                                                                                                               |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST endpoint (auto-provisioned by the Vercel Marketplace Upstash integration). Legacy `KV_REST_API_*` names are still accepted as fallbacks by `@upstash/redis`. |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (auto-provisioned). |
-| `WEBAUTHN_RP_ID` | Relying Party ID — the site's domain (e.g., `henrys.example.com`). `localhost` for local dev. |
-| `WEBAUTHN_RP_NAME` | Human-readable RP name (e.g., "Henry's Website"). |
-| `WEBAUTHN_ORIGIN` | Full origin, used to validate WebAuthn responses. |
+| `BLOB_READ_WRITE_TOKEN`                              | Vercel Blob (auto-provisioned).                                                                                                                                                 |
+| `WEBAUTHN_RP_ID`                                     | Relying Party ID — the site's domain (e.g., `henrys.example.com`). `localhost` for local dev.                                                                                   |
+| `WEBAUTHN_RP_NAME`                                   | Human-readable RP name (e.g., "Henry's Website").                                                                                                                               |
+| `WEBAUTHN_ORIGIN`                                    | Full origin, used to validate WebAuthn responses.                                                                                                                               |
 
 ## 11. Bootstrap / first run
 
@@ -250,9 +256,11 @@ One-time setup, performed by dad:
 ## 14. What a v1 "done" looks like
 
 Dad can:
+
 - Deploy, bootstrap users, and hand Henry the iPad.
 
 Henry can:
+
 - Open the site, tap his tile, Touch-ID in.
 - Tap **Draw**, make a new drawing, pick brushes/colors, draw with his finger and Apple Pencil.
 - Name the drawing, leave, come back, see it in his gallery, reopen and keep drawing.

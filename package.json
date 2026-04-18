@@ -13,6 +13,7 @@
     "eslint-config-next": "16.2.4",
     "prettier": "3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwind-lint": "^0.9.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
@@ -22,7 +23,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "format": "prettier --write .",
+    "format": "tailwind-lint --config ./app/globals.css **/*.{js,jsx,ts,tsx} --fix && prettier --write .",
     "lint": "eslint --fix --max-warnings=0 .",
     "lint:quiet": "eslint --fix --max-warnings=0 .",
     "start": "next start",
