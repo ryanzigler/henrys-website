@@ -50,7 +50,7 @@ export function UserPicker() {
         throw new Error(errMsg ?? 'verify failed');
       }
 
-      window.location.href = '/';
+      window.location.assign('/');
     } catch (err) {
       setError((err as Error).message);
     } finally {

@@ -11,7 +11,10 @@ type PublicUser = {
 };
 
 export default function RegisterPage() {
-  const [secret, setSecret] = useState<string | null>(null);
+  const [secret] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return new URL(window.location.href).searchParams.get('secret');
+  });
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [mode, setMode] = useState<'existing' | 'new'>('existing');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
@@ -22,8 +25,6 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    setSecret(url.searchParams.get('secret'));
     (async () => {
       const res = await fetch('/api/users');
       const body = (await res.json()) as { users: PublicUser[] };
