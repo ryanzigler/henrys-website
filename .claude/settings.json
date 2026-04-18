@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -qE '(^|/)(pnpm-lock\\.yaml|next-env\\.d\\.ts)$' && { echo 'Blocked: do not edit lockfile or generated type declarations. Use pnpm commands instead.' >&2; exit 2; } || exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -qE '\\.(ts|tsx|js|jsx|mjs|cjs|css)$' && pnpm typecheck && pnpm lint && pnpm format || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
