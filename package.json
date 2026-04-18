@@ -31,9 +31,12 @@
     "build": "next build",
     "dev": "next dev",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint --fix --max-warnings=0 .",
     "lint:quiet": "eslint --fix --max-warnings=0 .",
     "start": "next start",
+    "test": "vitest",
+    "test:run": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "version": "0.1.0"
