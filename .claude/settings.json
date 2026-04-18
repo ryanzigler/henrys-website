@@ -9,6 +9,16 @@
             "command": "jq -r '.tool_input.file_path // empty' | grep -qE '(^|/)(pnpm-lock\\.yaml|next-env\\.d\\.ts)$' && { echo 'Blocked: do not edit lockfile or generated type declarations. Use pnpm commands instead.' >&2; exit 2; } || exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-simplify.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
