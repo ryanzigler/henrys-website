@@ -1,0 +1,7 @@
+{
+  "experimentalOperatorPosition": "start",
+  "experimentalTernaries": true,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./app/globals.css",
+  "singleQuote": true
+}
