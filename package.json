@@ -20,6 +20,7 @@
     "jsdom": "^29.0.2",
     "prettier": "3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwind-lint": "^0.9.3",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.4"
@@ -30,7 +31,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "format": "prettier --write .",
+    "format": "tailwind-lint --config ./app/globals.css **/*.{js,jsx,ts,tsx} --fix && prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix --max-warnings=0 .",
     "lint:quiet": "eslint --fix --max-warnings=0 .",
