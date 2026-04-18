@@ -24,7 +24,7 @@ The site is intended to grow over time with additional features (browser games h
 
 - Next.js 16.2.4 (App Router) + React 19.2.4 + Tailwind 4
 - Deployed on Vercel (Hobby tier)
-- **Vercel KV** (Upstash Redis under the hood) for users, passkeys, sessions
+- **Upstash Redis** (installed via the Vercel Marketplace Upstash Redis integration) for users, passkeys, sessions. Client: `@upstash/redis`. (`@vercel/kv` is deprecated; do not use.)
 - **Vercel Blob** for drawing artifacts (JSON stroke data + PNG thumbnail)
 - **`@simplewebauthn/server`** + **`@simplewebauthn/browser`** for WebAuthn
 - **`perfect-freehand`** for stroke shaping (the library Excalidraw and tldraw both use internally)
@@ -218,7 +218,7 @@ middleware.ts
 | Var | Purpose |
 |---|---|
 | `ADMIN_SECRET` | Gates `/register` + related APIs. |
-| `KV_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN` | Vercel KV (auto-provisioned on Vercel). |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST endpoint (auto-provisioned by the Vercel Marketplace Upstash integration). Legacy `KV_REST_API_*` names are still accepted as fallbacks by `@upstash/redis`. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob (auto-provisioned). |
 | `WEBAUTHN_RP_ID` | Relying Party ID — the site's domain (e.g., `henrys.example.com`). `localhost` for local dev. |
 | `WEBAUTHN_RP_NAME` | Human-readable RP name (e.g., "Henry's Website"). |
@@ -228,7 +228,7 @@ middleware.ts
 
 One-time setup, performed by dad:
 
-1. Create the Vercel project; attach KV + Blob from the marketplace.
+1. Create the Vercel project; install the **Upstash Redis** + **Vercel Blob** integrations from the Vercel Marketplace.
 2. Set `ADMIN_SECRET`, `WEBAUTHN_RP_ID`, `WEBAUTHN_RP_NAME`, `WEBAUTHN_ORIGIN` env vars.
 3. Deploy.
 4. From Henry's iPad, visit `/register?secret=...` → create user "Henry" → register passkey (Touch ID).
