@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code local worktree cache
 .claude/worktrees/
+
+# git worktrees (feature-branch workspaces)
+.worktrees/
