@@ -18,24 +18,22 @@ export async function POST(req: Request) {
 
   const body = (await req.json().catch(() => ({}))) as Partial<Body>;
 
-  let userId: string;
+  let user: Awaited<ReturnType<typeof getUser>>;
   if ('userId' in body && body.userId) {
-    const existing = await getUser(body.userId);
-    if (!existing)
+    user = await getUser(body.userId);
+    if (!user)
       return NextResponse.json({ error: 'unknown user' }, { status: 404 });
-    userId = existing.id;
   } else if (
     'username' in body
     && body.username
     && body.displayName
     && body.emoji
   ) {
-    const user = await createUser({
+    user = await createUser({
       username: body.username,
       displayName: body.displayName,
       emoji: body.emoji,
     });
-    userId = user.id;
   } else {
     return NextResponse.json(
       { error: 'must include { userId } or { username, displayName, emoji }' },
@@ -43,15 +41,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const user = await getUser(userId);
-  if (!user)
-    return NextResponse.json(
-      { error: 'user not found after create' },
-      { status: 500 },
-    );
-
   const { rpID, rpName } = getWebAuthnConfig();
-  const existingCreds = await listCredentialsForUser(userId);
+  const existingCreds = await listCredentialsForUser(user.id);
 
   const options = await generateRegistrationOptions({
     rpID,
@@ -62,7 +53,7 @@ export async function POST(req: Request) {
     attestationType: 'none',
     excludeCredentials: existingCreds.map((c) => ({
       id: c.id,
-      transports: c.transports as never,
+      transports: c.transports,
     })),
     authenticatorSelection: {
       residentKey: 'preferred',
@@ -72,9 +63,9 @@ export async function POST(req: Request) {
 
   const { challengeId } = await saveChallenge({
     challenge: options.challenge,
-    userId,
+    userId: user.id,
     kind: 'register',
   });
 
-  return NextResponse.json({ challengeId, userId, options });
+  return NextResponse.json({ challengeId, userId: user.id, options });
 }

@@ -1,35 +1,43 @@
 import Link from 'next/link';
 
-type Props = {
+interface Props {
   title: string;
   emoji: string;
   href: string;
   disabled?: boolean;
   comingSoonLabel?: string;
-};
+}
 
-export function FeatureTile({
+const BASE =
+  'flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition';
+
+export const FeatureTile = ({
   title,
   emoji,
   href,
   disabled,
   comingSoonLabel,
-}: Props) {
-  const base =
-    'flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition';
+}: Props) => {
+  const body = (
+    <>
+      <span className="text-6xl">{emoji}</span>
+      <span className="text-lg font-semibold">{title}</span>
+      {disabled && comingSoonLabel && (
+        <span className="text-xs">{comingSoonLabel}</span>
+      )}
+    </>
+  );
+
   if (disabled) {
     return (
-      <div className={`${base} opacity-60`} aria-disabled="true">
-        <span className="text-6xl">{emoji}</span>
-        <span className="text-lg font-semibold">{title}</span>
-        {comingSoonLabel && <span className="text-xs">{comingSoonLabel}</span>}
+      <div className={`${BASE} opacity-60`} aria-disabled="true">
+        {body}
       </div>
     );
   }
   return (
-    <Link href={href} className={`${base} active:scale-95`}>
-      <span className="text-6xl">{emoji}</span>
-      <span className="text-lg font-semibold">{title}</span>
+    <Link href={href} className={`${BASE} active:scale-95`}>
+      {body}
     </Link>
   );
-}
+};

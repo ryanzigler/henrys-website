@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { verifyRegistrationResponse } from '@simplewebauthn/server';
+import {
+  verifyRegistrationResponse,
+  type AuthenticatorTransportFuture,
+} from '@simplewebauthn/server';
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser';
 import { isAdminRequest } from '@/lib/auth/admin';
 import { consumeChallenge } from '@/lib/auth/challenges';
@@ -53,7 +56,9 @@ export async function POST(req: Request) {
     userId: challenge.userId,
     publicKey: credential.publicKey,
     counter: credential.counter,
-    transports: credential.transports as string[] | undefined,
+    transports: credential.transports as
+      | AuthenticatorTransportFuture[]
+      | undefined,
   });
 
   return NextResponse.json({ ok: true, userId: challenge.userId });

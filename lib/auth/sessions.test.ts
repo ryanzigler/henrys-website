@@ -13,23 +13,30 @@ import {
   createSession,
   getSession,
   destroySession,
+  verifyCookieValue,
   SESSION_TTL_SECONDS,
 } from './sessions';
 
-describe('sessions', () => {
-  beforeEach(async () => {
-    await fakeKv.del(...['session:dummy']);
-    // clear everything in-memory by creating a new store
-    (fakeKv as unknown as { store: Map<string, unknown> }).store.clear();
-  });
+const TEST_USER = { id: 'user-1', displayName: 'Henry', emoji: '🦖' };
 
-  it('createSession stores a record and returns an ID', async () => {
-    const { sessionId, userId } = await createSession('user-1');
+const resetKv = () => {
+  (fakeKv as unknown as { store: Map<string, unknown> }).store.clear();
+  (fakeKv as unknown as { sets: Map<string, Set<string>> }).sets.clear();
+};
+
+describe('sessions', () => {
+  beforeEach(resetKv);
+
+  it('createSession stores a denormalized record and returns an ID', async () => {
+    const { sessionId, userId } = await createSession(TEST_USER);
     expect(sessionId).toMatch(/^[0-9a-f]{64}$/);
     expect(userId).toBe('user-1');
 
-    const rec = await getSession(sessionId);
-    expect(rec).toEqual({ userId: 'user-1', expiresAt: expect.any(Number) });
+    expect(await getSession(sessionId)).toEqual({
+      userId: 'user-1',
+      displayName: 'Henry',
+      emoji: '🦖',
+    });
   });
 
   it('getSession returns null for an unknown id', async () => {
@@ -37,7 +44,7 @@ describe('sessions', () => {
   });
 
   it('destroySession removes the record', async () => {
-    const { sessionId } = await createSession('user-1');
+    const { sessionId } = await createSession(TEST_USER);
     await destroySession(sessionId);
     expect(await getSession(sessionId)).toBeNull();
   });
@@ -47,32 +54,54 @@ describe('sessions', () => {
   });
 });
 
-vi.mock('next/headers', () => {
-  const store = new Map<string, string>();
-  return {
-    cookies: async () => ({
-      get: (name: string) => {
-        const v = store.get(name);
-        return v ? { name, value: v } : undefined;
-      },
-      set: (
-        nameOrObj: string | { name: string; value: string },
-        value?: string,
-      ) => {
-        if (typeof nameOrObj === 'string') store.set(nameOrObj, value ?? '');
-        else store.set(nameOrObj.name, nameOrObj.value);
-      },
-      delete: (name: string) => store.delete(name),
-      _store: store,
-    }),
-  };
+describe('verifyCookieValue', () => {
+  it('accepts a cookie signed with the current secret', async () => {
+    const { setSessionCookie } = await import('./sessions');
+    const { sessionId } = await createSession(TEST_USER);
+    await setSessionCookie(sessionId);
+    const stored = cookieStore.get('session');
+    expect(verifyCookieValue(stored)).toBe(sessionId);
+  });
+
+  it('rejects a tampered cookie', () => {
+    expect(verifyCookieValue('abc.deadbeef')).toBeNull();
+  });
+
+  it('rejects a malformed cookie', () => {
+    expect(verifyCookieValue('no-dot-here')).toBeNull();
+    expect(verifyCookieValue('')).toBeNull();
+    expect(verifyCookieValue(undefined)).toBeNull();
+  });
 });
 
+const cookieStore = new Map<string, string>();
+vi.mock('next/headers', () => ({
+  cookies: async () => ({
+    get: (name: string) => {
+      const v = cookieStore.get(name);
+      return v ? { name, value: v } : undefined;
+    },
+    set: (
+      nameOrObj: string | { name: string; value: string },
+      value?: string,
+    ) => {
+      if (typeof nameOrObj === 'string')
+        cookieStore.set(nameOrObj, value ?? '');
+      else cookieStore.set(nameOrObj.name, nameOrObj.value);
+    },
+    delete: (name: string) => cookieStore.delete(name),
+  }),
+}));
+
 describe('session cookie helpers', () => {
-  it('setSessionCookie writes the session id', async () => {
+  it('setSessionCookie writes a signed session id that getSessionFromCookie can read', async () => {
     const { setSessionCookie, getSessionFromCookie, createSession } =
       await import('./sessions');
-    const { sessionId } = await createSession('user-2');
+    const { sessionId } = await createSession({
+      id: 'user-2',
+      displayName: 'Two',
+      emoji: '🥈',
+    });
     await setSessionCookie(sessionId);
     const record = await getSessionFromCookie();
     expect(record?.userId).toBe('user-2');

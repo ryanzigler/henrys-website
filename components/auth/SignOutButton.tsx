@@ -1,10 +1,10 @@
 'use client';
 
-export function SignOutButton() {
-  async function signOut() {
+export const SignOutButton = () => {
+  const signOut = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/login';
-  }
+  };
   return (
     <button
       type="button"
@@ -14,4 +14,4 @@ export function SignOutButton() {
       sign out
     </button>
   );
-}
+};

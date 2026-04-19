@@ -1,74 +1,100 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
-import { kv } from '../kv';
-import { randomToken } from '../random';
+import { kv } from '@/lib/kv';
+import { randomToken } from '@/lib/random';
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const SESSION_COOKIE_NAME = 'session';
 
-export type SessionRecord = {
+export interface SessionRecord {
   userId: string;
-  expiresAt: number;
+  displayName: string;
+  emoji: string;
+}
+
+const sessionKey = (id: string) => `session:${id}`;
+
+const getSecret = () => {
+  const s = process.env.AUTH_COOKIE_SECRET;
+  if (!s) throw new Error('AUTH_COOKIE_SECRET is not set');
+  return s;
 };
 
-function sessionKey(id: string): string {
-  return `session:${id}`;
-}
+const sign = (value: string) =>
+  createHmac('sha256', getSecret()).update(value).digest('base64url');
 
-export async function createSession(
-  userId: string,
-): Promise<{ sessionId: string; userId: string }> {
+const signedCookieValue = (sessionId: string) =>
+  `${sessionId}.${sign(sessionId)}`;
+
+export const verifyCookieValue = (cookieValue: string | undefined) => {
+  if (!cookieValue) return null;
+  const dot = cookieValue.lastIndexOf('.');
+  if (dot <= 0) return null;
+  const sessionId = cookieValue.slice(0, dot);
+  const provided = cookieValue.slice(dot + 1);
+  const expected = sign(sessionId);
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  return sessionId;
+};
+
+export const createSession = async (user: {
+  id: string;
+  displayName: string;
+  emoji: string;
+}) => {
   const sessionId = randomToken(32);
-  const expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
-  await kv.set(
-    sessionKey(sessionId),
-    { userId, expiresAt } satisfies SessionRecord,
-    {
-      ex: SESSION_TTL_SECONDS,
-    },
-  );
-  return { sessionId, userId };
-}
+  const record: SessionRecord = {
+    userId: user.id,
+    displayName: user.displayName,
+    emoji: user.emoji,
+  };
+  await kv.set(sessionKey(sessionId), record, { ex: SESSION_TTL_SECONDS });
+  return { sessionId, userId: user.id };
+};
 
-export async function getSession(
-  sessionId: string,
-): Promise<SessionRecord | null> {
+export const getSession = async (sessionId: string) => {
   if (!sessionId) return null;
   return (await kv.get<SessionRecord>(sessionKey(sessionId))) ?? null;
-}
+};
 
-export async function destroySession(sessionId: string): Promise<void> {
+export const destroySession = async (sessionId: string) => {
   if (!sessionId) return;
   await kv.del(sessionKey(sessionId));
-}
+};
 
-export async function extendSession(sessionId: string): Promise<void> {
-  const rec = await getSession(sessionId);
-  if (!rec) return;
-  rec.expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
-  await kv.set(sessionKey(sessionId), rec, { ex: SESSION_TTL_SECONDS });
-}
+export const extendSession = async (sessionId: string) => {
+  if (!sessionId) return;
+  await kv.expire(sessionKey(sessionId), SESSION_TTL_SECONDS);
+};
 
-export async function setSessionCookie(sessionId: string): Promise<void> {
+export const setSessionCookie = async (sessionId: string) => {
   const jar = await cookies();
   jar.set({
     name: SESSION_COOKIE_NAME,
-    value: sessionId,
+    value: signedCookieValue(sessionId),
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
     path: '/',
     maxAge: SESSION_TTL_SECONDS,
   });
-}
+};
 
-export async function clearSessionCookie(): Promise<void> {
+export const clearSessionCookie = async () => {
   const jar = await cookies();
   jar.delete(SESSION_COOKIE_NAME);
-}
+};
 
-export async function getSessionFromCookie(): Promise<SessionRecord | null> {
+export const getSessionFromCookie = async () => {
   const jar = await cookies();
-  const c = jar.get(SESSION_COOKIE_NAME);
-  if (!c?.value) return null;
-  return getSession(c.value);
-}
+  const sessionId = verifyCookieValue(jar.get(SESSION_COOKIE_NAME)?.value);
+  if (!sessionId) return null;
+  return getSession(sessionId);
+};
+
+export const getSessionIdFromCookie = async () => {
+  const jar = await cookies();
+  return verifyCookieValue(jar.get(SESSION_COOKIE_NAME)?.value);
+};

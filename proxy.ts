@@ -1,38 +1,21 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { getSession, SESSION_COOKIE_NAME } from '@/lib/auth/sessions';
+import { SESSION_COOKIE_NAME, verifyCookieValue } from '@/lib/auth/sessions';
 
-const PUBLIC_PATHS = [
-  '/login',
-  '/register',
-  '/api/users',
-  '/api/auth/login/options',
-  '/api/auth/login/verify',
-  '/api/auth/register/options',
-  '/api/auth/register/verify',
-  '/api/auth/logout',
-];
+const PUBLIC_PATHS = new Set(['/login', '/register', '/api/users']);
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+const isPublic = (pathname: string) =>
+  PUBLIC_PATHS.has(pathname) || pathname.startsWith('/api/auth/');
 
-  if (PUBLIC_PATHS.some((p) => pathname === p)) {
-    return NextResponse.next();
+export const proxy = (request: NextRequest) => {
+  if (isPublic(request.nextUrl.pathname)) return NextResponse.next();
+
+  const cookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  if (!verifyCookieValue(cookie)) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
-
-  const sessionId = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const record = sessionId ? await getSession(sessionId) : null;
-
-  if (!record) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
   return NextResponse.next();
-}
+};
 
 export const config = {
-  matcher: [
-    // Run on everything except Next static assets and the favicon
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

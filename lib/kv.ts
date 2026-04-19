@@ -32,11 +32,19 @@ export class FakeKV {
     return e ? (e.value as T) : null;
   }
 
+  async getdel<T = unknown>(key: string): Promise<T | null> {
+    const e = this.alive(key);
+    if (!e) return null;
+    this.store.delete(key);
+    return e.value as T;
+  }
+
   async set(
     key: string,
     value: unknown,
-    opts?: { ex?: number },
-  ): Promise<'OK'> {
+    opts?: { ex?: number; nx?: boolean },
+  ): Promise<'OK' | null> {
+    if (opts?.nx && this.alive(key)) return null;
     const expiresAt =
       opts?.ex !== undefined ? this.clock() + opts.ex * 1000 : null;
     this.store.set(key, { value, expiresAt });
@@ -57,6 +65,11 @@ export class FakeKV {
     if (!e) return 0;
     e.expiresAt = this.clock() + seconds * 1000;
     return 1;
+  }
+
+  async scard(key: string): Promise<number> {
+    const s = this.sets.get(key);
+    return s ? s.size : 0;
   }
 
   async sadd(key: string, ...members: string[]): Promise<number> {
