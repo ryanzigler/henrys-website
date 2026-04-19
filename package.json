@@ -1,21 +1,29 @@
 {
   "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.0",
+    "@upstash/redis": "^1.37.0",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "jsdom": "^29.0.2",
     "prettier": "3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwind-lint": "^0.9.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   },
   "name": "henrys-website",
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
@@ -24,9 +32,12 @@
     "build": "next build",
     "dev": "next dev",
     "format": "tailwind-lint --config ./app/globals.css **/*.{js,jsx,ts,tsx} --fix && prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint --fix --max-warnings=0 .",
     "lint:quiet": "eslint --fix --max-warnings=0 .",
     "start": "next start",
+    "test": "vitest",
+    "test:run": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "version": "0.1.0"

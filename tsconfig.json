@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "types": ["vitest/globals"]
   },
   "include": [
     "next-env.d.ts",
@@ -28,7 +29,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
   ],
   "exclude": ["node_modules"]
 }
