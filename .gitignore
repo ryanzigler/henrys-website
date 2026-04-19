@@ -46,3 +46,4 @@ next-env.d.ts
 
 # git worktrees (feature-branch workspaces)
 .worktrees/
+.env*.local
