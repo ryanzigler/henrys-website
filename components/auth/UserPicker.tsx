@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
-
-type PublicUser = {
-  id: string;
-  displayName: string;
-  emoji: string;
-  hasPasskey: boolean;
-};
+import type { PublicUser } from '@/lib/auth/users';
 
 export function UserPicker() {
   const [users, setUsers] = useState<PublicUser[] | null>(null);

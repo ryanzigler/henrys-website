@@ -7,6 +7,7 @@ import type { AuthenticationResponseJSON } from '@simplewebauthn/browser';
 import { consumeChallenge } from '@/lib/auth/challenges';
 import { getCredential, updateCredentialCounter } from '@/lib/auth/credentials';
 import { createSession, setSessionCookie } from '@/lib/auth/sessions';
+import { getUser } from '@/lib/auth/users';
 import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
 
 type Body = {
@@ -47,9 +48,9 @@ export async function POST(req: Request) {
       expectedRPID: rpID,
       credential: {
         id: credential.id,
-        publicKey: credential.publicKey.slice(),
+        publicKey: credential.publicKey,
         counter: credential.counter,
-        transports: credential.transports as never,
+        transports: credential.transports,
       },
       requireUserVerification: true,
     });
@@ -64,12 +65,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'not verified' }, { status: 400 });
   }
 
+  const user = await getUser(challenge.userId);
+  if (!user) {
+    return NextResponse.json({ error: 'user vanished' }, { status: 500 });
+  }
+
   await updateCredentialCounter(
     credential.id,
     verification.authenticationInfo.newCounter,
   );
 
-  const { sessionId } = await createSession(challenge.userId);
+  const { sessionId } = await createSession(user);
   await setSessionCookie(sessionId);
 
   return NextResponse.json({ ok: true });

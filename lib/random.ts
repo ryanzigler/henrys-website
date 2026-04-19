@@ -1,5 +1,5 @@
-export function randomToken(bytes: number = 32): string {
+export const randomToken = (bytes: number = 32) => {
   const buf = new Uint8Array(bytes);
   crypto.getRandomValues(buf);
-  return Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
-}
+  return Buffer.from(buf).toString('hex');
+};

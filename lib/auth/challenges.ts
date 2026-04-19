@@ -1,5 +1,5 @@
-import { kv } from '../kv';
-import { randomToken } from '../random';
+import { kv } from '@/lib/kv';
+import { randomToken } from '@/lib/random';
 
 export const CHALLENGE_TTL_SECONDS = 5 * 60;
 
@@ -23,11 +23,5 @@ export async function saveChallenge(
   return { challengeId };
 }
 
-export async function consumeChallenge(
-  challengeId: string,
-): Promise<ChallengeRecord | null> {
-  const record = await kv.get<ChallengeRecord>(challengeKey(challengeId));
-  if (!record) return null;
-  await kv.del(challengeKey(challengeId));
-  return record;
-}
+export const consumeChallenge = async (challengeId: string) =>
+  (await kv.getdel<ChallengeRecord>(challengeKey(challengeId))) ?? null;

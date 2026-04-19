@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
-
-type PublicUser = {
-  id: string;
-  displayName: string;
-  emoji: string;
-  hasPasskey: boolean;
-};
+import type { PublicUser } from '@/lib/auth/users';
 
 export default function RegisterPage() {
   const [secret] = useState<string | null>(() => {

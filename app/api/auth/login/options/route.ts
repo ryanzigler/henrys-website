@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     userVerification: 'required',
     allowCredentials: creds.map((c) => ({
       id: c.id,
-      transports: c.transports as never,
+      transports: c.transports,
     })),
   });
 

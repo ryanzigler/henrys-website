@@ -1,41 +1,39 @@
-import { kv } from '../kv';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+import { kv } from '@/lib/kv';
 
-export type Credential = {
-  id: string; // base64url credential ID
+export interface Credential {
+  id: string;
   userId: string;
-  publicKey: Uint8Array;
+  publicKey: Uint8Array<ArrayBuffer>;
   counter: number;
-  transports?: string[];
+  transports?: AuthenticatorTransportFuture[];
   createdAt: number;
-};
+}
 
-type StoredCredential = Omit<Credential, 'publicKey'> & {
+interface StoredCredential extends Omit<Credential, 'publicKey'> {
   publicKeyBase64: string;
-};
+}
 
 const credentialKey = (id: string) => `credential:${id}`;
 const userCredentialsKey = (userId: string) => `user:${userId}:credentials`;
 
-function encodePublicKey(bytes: Uint8Array): string {
-  let s = '';
-  for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s);
-}
+const encodePublicKey = (bytes: Uint8Array) =>
+  Buffer.from(bytes).toString('base64');
 
-function decodePublicKey(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+const decodePublicKey = (b64: string) => {
+  const buf = Buffer.from(b64, 'base64');
+  const out = new Uint8Array(buf.length);
+  out.set(buf);
   return out;
-}
+};
 
-export async function saveCredential(input: {
+export const saveCredential = async (input: {
   id: string;
   userId: string;
   publicKey: Uint8Array;
   counter: number;
-  transports?: string[];
-}): Promise<void> {
+  transports?: AuthenticatorTransportFuture[];
+}) => {
   const stored: StoredCredential = {
     id: input.id,
     userId: input.userId,
@@ -44,37 +42,36 @@ export async function saveCredential(input: {
     transports: input.transports,
     createdAt: Date.now(),
   };
-  await kv.set(credentialKey(input.id), stored);
-  await kv.sadd(userCredentialsKey(input.userId), input.id);
-}
+  await Promise.all([
+    kv.set(credentialKey(input.id), stored),
+    kv.sadd(userCredentialsKey(input.userId), input.id),
+  ]);
+};
 
-export async function getCredential(id: string): Promise<Credential | null> {
+export const getCredential = async (id: string): Promise<Credential | null> => {
   const stored = await kv.get<StoredCredential>(credentialKey(id));
   if (!stored) return null;
-  return {
-    id: stored.id,
-    userId: stored.userId,
-    publicKey: decodePublicKey(stored.publicKeyBase64),
-    counter: stored.counter,
-    transports: stored.transports,
-    createdAt: stored.createdAt,
-  };
-}
+  const { publicKeyBase64, ...rest } = stored;
+  return { ...rest, publicKey: decodePublicKey(publicKeyBase64) };
+};
 
-export async function listCredentialsForUser(
-  userId: string,
-): Promise<Credential[]> {
+export const listCredentialsForUser = async (userId: string) => {
   const ids = await kv.smembers(userCredentialsKey(userId));
   const creds = await Promise.all(ids.map((id) => getCredential(id)));
   return creds.filter((c): c is Credential => c !== null);
-}
+};
 
-export async function updateCredentialCounter(
+export const countCredentialsForUser = (userId: string) =>
+  kv.scard(userCredentialsKey(userId));
+
+export const updateCredentialCounter = async (
   id: string,
   newCounter: number,
-): Promise<void> {
+) => {
   const stored = await kv.get<StoredCredential>(credentialKey(id));
-  if (!stored) return;
+  if (!stored) {
+    throw new Error(`credential ${id} missing during counter update`);
+  }
   stored.counter = newCounter;
   await kv.set(credentialKey(id), stored);
-}
+};
