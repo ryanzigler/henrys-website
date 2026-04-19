@@ -89,13 +89,13 @@ Excalidraw was removed in an earlier commit (`9d886e1`); this task only removes 
 - Delete: `public/next.svg`, `public/vercel.svg`, `public/globe.svg`, `public/window.svg`, `public/file.svg`.
 - Replace: `app/page.tsx` with a minimal placeholder (final content lands in Task 25).
 
-- [ ] **Step 1: Delete default SVG assets**
+- [x] **Step 1: Delete default SVG assets**
 
 ```bash
 rm public/next.svg public/vercel.svg public/globe.svg public/window.svg public/file.svg
 ```
 
-- [ ] **Step 2: Replace `app/page.tsx` with a minimal placeholder**
+- [x] **Step 2: Replace `app/page.tsx` with a minimal placeholder**
 
 ```tsx
 export default function Page() {
@@ -103,7 +103,7 @@ export default function Page() {
 }
 ```
 
-- [ ] **Step 3: Typecheck**
+- [x] **Step 3: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -111,7 +111,7 @@ pnpm typecheck
 
 Expected: exit code 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add public app/page.tsx
@@ -126,7 +126,7 @@ git commit -m "Remove default scaffolding SVGs and stub home page"
 
 - Modify: `package.json`, `pnpm-lock.yaml`.
 
-- [ ] **Step 1: Install runtime deps**
+- [x] **Step 1: Install runtime deps**
 
 ```bash
 pnpm add @simplewebauthn/server@^13.3.0 @simplewebauthn/browser@^13.3.0 @upstash/redis@^1.37.0
@@ -134,7 +134,7 @@ pnpm add @simplewebauthn/server@^13.3.0 @simplewebauthn/browser@^13.3.0 @upstash
 
 Note: `@vercel/kv` is deprecated; the Vercel Marketplace Upstash Redis integration is the supported path, and the client is `@upstash/redis` directly. `Redis.fromEnv()` reads `UPSTASH_REDIS_REST_URL`/`TOKEN` with a fallback to the legacy `KV_REST_API_URL`/`TOKEN`, so either naming works.
 
-- [ ] **Step 2: Verify versions in package.json**
+- [x] **Step 2: Verify versions in package.json**
 
 Expected `dependencies` section contains:
 
@@ -144,7 +144,7 @@ Expected `dependencies` section contains:
 "@upstash/redis": "^1.37.0",
 ```
 
-- [ ] **Step 3: Type-check**
+- [x] **Step 3: Type-check**
 
 ```bash
 pnpm tsc --noEmit
@@ -152,7 +152,7 @@ pnpm tsc --noEmit
 
 Expected: exit code 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml
@@ -167,13 +167,13 @@ git commit -m "Add auth dependencies (@simplewebauthn, @upstash/redis)"
 
 - Modify: `package.json`, `pnpm-lock.yaml`.
 
-- [ ] **Step 1: Install test deps**
+- [x] **Step 1: Install test deps**
 
 ```bash
 pnpm add -D vitest @vitejs/plugin-react @testing-library/react @testing-library/jest-dom jsdom
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml
@@ -191,7 +191,7 @@ git commit -m "Add vitest and testing-library dev deps"
 - Modify: `package.json` (add scripts)
 - Modify: `tsconfig.json` (add vitest types)
 
-- [ ] **Step 1: Write a smoke test that must pass**
+- [x] **Step 1: Write a smoke test that must pass**
 
 Create `lib/smoke.test.ts`:
 
@@ -205,7 +205,7 @@ describe('smoke', () => {
 });
 ```
 
-- [ ] **Step 2: Create `vitest.config.ts`**
+- [x] **Step 2: Create `vitest.config.ts`**
 
 ```ts
 import { defineConfig } from 'vitest/config';
@@ -229,13 +229,13 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Create `vitest.setup.ts`**
+- [x] **Step 3: Create `vitest.setup.ts`**
 
 ```ts
 import '@testing-library/jest-dom/vitest';
 ```
 
-- [ ] **Step 4: Update `tsconfig.json` types**
+- [x] **Step 4: Update `tsconfig.json` types**
 
 Add `"vitest/globals"` to compilerOptions.types, and include the config files:
 
@@ -251,7 +251,7 @@ And `include`:
 "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "vitest.config.ts", "vitest.setup.ts"],
 ```
 
-- [ ] **Step 5: Add npm scripts**
+- [x] **Step 5: Add npm scripts**
 
 In `package.json`, replace the `scripts` block with:
 
@@ -277,7 +277,7 @@ node_modules
 pnpm-lock.yaml
 ```
 
-- [ ] **Step 6: Run the smoke test**
+- [x] **Step 6: Run the smoke test**
 
 ```bash
 pnpm test:run
@@ -285,7 +285,7 @@ pnpm test:run
 
 Expected: 1 passing test, exits 0.
 
-- [ ] **Step 7: Format, typecheck, commit**
+- [x] **Step 7: Format, typecheck, commit**
 
 ```bash
 pnpm format
@@ -302,7 +302,7 @@ git commit -m "Configure Vitest with jsdom and testing-library"
 
 - Create: `.env.example`
 
-- [ ] **Step 1: Create `.env.example`**
+- [x] **Step 1: Create `.env.example`**
 
 ```sh
 # Upstash Redis (auto-provisioned when you install the Upstash Redis integration from the Vercel Marketplace).
@@ -324,7 +324,7 @@ WEBAUTHN_RP_NAME=Henry's Website
 ADMIN_SECRET=change-me
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add .env.example
@@ -340,7 +340,7 @@ git commit -m "Add .env.example"
 - Create: `lib/random.ts`
 - Create: `lib/random.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/random.test.ts`:
 
@@ -362,7 +362,7 @@ describe('randomToken', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/random
@@ -370,7 +370,7 @@ pnpm test:run lib/random
 
 Expected: FAIL — `randomToken` not defined.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/random.ts`:
 
@@ -382,7 +382,7 @@ export function randomToken(bytes: number = 32): string {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/random
@@ -390,7 +390,7 @@ pnpm test:run lib/random
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/random.ts lib/random.test.ts
@@ -408,7 +408,7 @@ git commit -m "Add randomToken helper"
 
 We instantiate a shared `@upstash/redis` client with `Redis.fromEnv()` for runtime use. For tests, we ship a `FakeKV` class that implements the subset of Redis commands we actually use (`get`, `set` with `ex`, `del`, `sadd`, `smembers`, `srem`, `expire`). Tests replace the exported `kv` via `vi.mock`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/kv.test.ts`:
 
@@ -459,7 +459,7 @@ describe('FakeKV', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/kv
@@ -467,7 +467,7 @@ pnpm test:run lib/kv
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/kv.ts`:
 
@@ -566,7 +566,7 @@ export class FakeKV {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/kv
@@ -574,7 +574,7 @@ pnpm test:run lib/kv
 
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/kv.ts lib/kv.test.ts
@@ -592,7 +592,7 @@ git commit -m "Add Upstash Redis client and FakeKV test double"
 
 Session record is stored at `session:<sessionId>` with value `{ userId, expiresAt }` and TTL = 30 days. Cookie is `session=<sessionId>` with matching Max-Age, HttpOnly, Secure, SameSite=Lax.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/sessions.test.ts`:
 
@@ -645,7 +645,7 @@ describe('sessions', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/sessions
@@ -653,7 +653,7 @@ pnpm test:run lib/auth/sessions
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement core session helpers**
+- [x] **Step 3: Implement core session helpers**
 
 Create `lib/auth/sessions.ts`:
 
@@ -708,7 +708,7 @@ export async function extendSession(sessionId: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/auth/sessions
@@ -716,7 +716,7 @@ pnpm test:run lib/auth/sessions
 
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/sessions.ts lib/auth/sessions.test.ts
@@ -732,7 +732,7 @@ git commit -m "Add session helpers (create, get, destroy, extend)"
 - Modify: `lib/auth/sessions.ts` — add `setSessionCookie`, `clearSessionCookie`, `getSessionFromCookie`.
 - Modify: `lib/auth/sessions.test.ts` — add cookie helper tests.
 
-- [ ] **Step 1: Extend the test**
+- [x] **Step 1: Extend the test**
 
 Append to `lib/auth/sessions.test.ts`:
 
@@ -779,7 +779,7 @@ describe('session cookie helpers', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/sessions
@@ -787,7 +787,7 @@ pnpm test:run lib/auth/sessions
 
 Expected: FAIL — helpers not defined.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `lib/auth/sessions.ts`:
 
@@ -820,7 +820,7 @@ export async function getSessionFromCookie(): Promise<SessionRecord | null> {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/auth/sessions
@@ -828,7 +828,7 @@ pnpm test:run lib/auth/sessions
 
 Expected: PASS (6 tests total).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/sessions.ts lib/auth/sessions.test.ts
@@ -846,7 +846,7 @@ git commit -m "Add session cookie helpers"
 
 User record at `user:<userId>` with shape `{ id, username, displayName, emoji, createdAt }`. The set of all user IDs lives at `users`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/users.test.ts`:
 
@@ -915,7 +915,7 @@ describe('users', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/users
@@ -923,7 +923,7 @@ pnpm test:run lib/auth/users
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/auth/users.ts`:
 
@@ -998,7 +998,7 @@ export async function getPublicUsers(): Promise<PublicUser[]> {
 }
 ```
 
-- [ ] **Step 4: Run — expect failure (credentials module missing)**
+- [x] **Step 4: Run — expect failure (credentials module missing)**
 
 ```bash
 pnpm test:run lib/auth/users
@@ -1006,7 +1006,7 @@ pnpm test:run lib/auth/users
 
 Expected: FAIL because `./credentials` does not exist yet. This is intentional — Task 11 adds it.
 
-- [ ] **Step 5: Commit (pause here; test will pass after Task 11)**
+- [x] **Step 5: Commit (pause here; test will pass after Task 11)**
 
 ```bash
 git add lib/auth/users.ts lib/auth/users.test.ts
@@ -1026,7 +1026,7 @@ Credential record at `credential:<credentialId>` with shape `{ userId, publicKey
 
 We base64-encode `publicKey` for KV storage because Redis only stores strings; `@simplewebauthn/server` returns `publicKey` as a `Uint8Array`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/credentials.test.ts`:
 
@@ -1118,7 +1118,7 @@ describe('credentials', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/credentials
@@ -1126,7 +1126,7 @@ pnpm test:run lib/auth/credentials
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/auth/credentials.ts`:
 
@@ -1213,7 +1213,7 @@ export async function updateCredentialCounter(
 }
 ```
 
-- [ ] **Step 4: Run — expect both users and credentials test suites pass**
+- [x] **Step 4: Run — expect both users and credentials test suites pass**
 
 ```bash
 pnpm test:run lib/auth
@@ -1221,7 +1221,7 @@ pnpm test:run lib/auth
 
 Expected: PASS (users + credentials tests all green).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/credentials.ts lib/auth/credentials.test.ts
@@ -1239,7 +1239,7 @@ git commit -m "Add credential CRUD"
 
 Short-lived (5-minute TTL) WebAuthn challenges keyed by a random token that the client echoes back. We issue a `challengeId` to the client alongside the options; on verify, the client sends the `challengeId`, we look up the stored challenge, and consume (delete) it.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/challenges.test.ts`:
 
@@ -1298,7 +1298,7 @@ describe('challenges', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/challenges
@@ -1306,7 +1306,7 @@ pnpm test:run lib/auth/challenges
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/auth/challenges.ts`:
 
@@ -1346,7 +1346,7 @@ export async function consumeChallenge(
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/auth/challenges
@@ -1354,7 +1354,7 @@ pnpm test:run lib/auth/challenges
 
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/challenges.ts lib/auth/challenges.test.ts
@@ -1370,7 +1370,7 @@ git commit -m "Add WebAuthn challenge storage"
 - Create: `lib/auth/webauthn-config.ts`
 - Create: `lib/auth/webauthn-config.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/webauthn-config.test.ts`:
 
@@ -1404,7 +1404,7 @@ describe('webauthn-config', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/webauthn-config
@@ -1412,7 +1412,7 @@ pnpm test:run lib/auth/webauthn-config
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/auth/webauthn-config.ts`:
 
@@ -1434,7 +1434,7 @@ export function getWebAuthnConfig(): WebAuthnConfig {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/auth/webauthn-config
@@ -1442,7 +1442,7 @@ pnpm test:run lib/auth/webauthn-config
 
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/webauthn-config.ts lib/auth/webauthn-config.test.ts
@@ -1458,7 +1458,7 @@ git commit -m "Add WebAuthn RP config from env"
 - Create: `lib/auth/admin.ts`
 - Create: `lib/auth/admin.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `lib/auth/admin.test.ts`:
 
@@ -1500,7 +1500,7 @@ describe('isAdminRequest', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run lib/auth/admin
@@ -1508,7 +1508,7 @@ pnpm test:run lib/auth/admin
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `lib/auth/admin.ts`:
 
@@ -1530,7 +1530,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run lib/auth/admin
@@ -1538,7 +1538,7 @@ pnpm test:run lib/auth/admin
 
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/auth/admin.ts lib/auth/admin.test.ts
@@ -1556,7 +1556,7 @@ git commit -m "Add admin-gate helper"
 
 `GET /api/users` returns `PublicUser[]` for the login picker. Public (unauthenticated). We add the path to the proxy allowlist in Task 21.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `app/api/users/route.test.ts`:
 
@@ -1606,7 +1606,7 @@ describe('GET /api/users', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [x] **Step 2: Run — expect failure**
 
 ```bash
 pnpm test:run app/api/users
@@ -1614,7 +1614,7 @@ pnpm test:run app/api/users
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `app/api/users/route.ts`:
 
@@ -1628,7 +1628,7 @@ export async function GET() {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- [x] **Step 4: Run — expect pass**
 
 ```bash
 pnpm test:run app/api/users
@@ -1636,7 +1636,7 @@ pnpm test:run app/api/users
 
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/api/users/route.ts app/api/users/route.test.ts
@@ -1654,7 +1654,7 @@ git commit -m "Add public users API"
 `POST /api/auth/login/options` body: `{ userId: string }`.
 Response: `{ challengeId: string, options: PublicKeyCredentialRequestOptionsJSON }`.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/api/auth/login/options/route.ts`:
 
@@ -1704,7 +1704,7 @@ export async function POST(req: Request) {
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -1712,7 +1712,7 @@ pnpm typecheck
 
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/api/auth/login/options/route.ts
@@ -1730,7 +1730,7 @@ git commit -m "Add /api/auth/login/options"
 `POST /api/auth/login/verify` body: `{ challengeId, response }` where `response` is the `AuthenticationResponseJSON` from `startAuthentication`.
 Response: `{ ok: true }` with `Set-Cookie: session=…`.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/api/auth/login/verify/route.ts`:
 
@@ -1813,7 +1813,7 @@ export async function POST(req: Request) {
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -1821,7 +1821,7 @@ pnpm typecheck
 
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/api/auth/login/verify/route.ts
@@ -1838,7 +1838,7 @@ git commit -m "Add /api/auth/login/verify"
 
 `POST /api/auth/register/options?secret=<ADMIN_SECRET>` body: either `{ userId }` (add device to existing user) or `{ username, displayName, emoji }` (new user — creates and issues options).
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/api/auth/register/options/route.ts`:
 
@@ -1925,7 +1925,7 @@ export async function POST(req: Request) {
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -1933,7 +1933,7 @@ pnpm typecheck
 
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/api/auth/register/options/route.ts
@@ -1948,7 +1948,7 @@ git commit -m "Add /api/auth/register/options (admin gated)"
 
 - Create: `app/api/auth/register/verify/route.ts`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/api/auth/register/verify/route.ts`:
 
@@ -2015,7 +2015,7 @@ export async function POST(req: Request) {
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -2023,7 +2023,7 @@ pnpm typecheck
 
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/api/auth/register/verify/route.ts
@@ -2038,7 +2038,7 @@ git commit -m "Add /api/auth/register/verify (admin gated)"
 
 - Create: `app/api/auth/logout/route.ts`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/api/auth/logout/route.ts`:
 
@@ -2060,7 +2060,7 @@ export async function POST() {
 }
 ```
 
-- [ ] **Step 2: Typecheck + commit**
+- [x] **Step 2: Typecheck + commit**
 
 ```bash
 pnpm typecheck
@@ -2084,7 +2084,7 @@ The proxy lets the following through without a session:
 
 Everything else requires a valid session cookie; otherwise redirect to `/login`.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `proxy.ts` at project root:
 
@@ -2135,7 +2135,7 @@ Notes:
 - `runtime: "nodejs"` is required because `@simplewebauthn/server` uses Node-ish crypto. Even though we don't call it from the proxy, using the Node runtime avoids surprises as this file grows. Next.js 15.5+ supports Node runtime in proxy/middleware.
 - `@upstash/redis` works in both the Node and Edge runtimes (it's HTTP-based via the REST endpoint), so the proxy's session lookup is safe either way. We pick Node for this project so the same runtime is in force everywhere, eliminating a category of import-compatibility surprises as the codebase grows.
 
-- [ ] **Step 2: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm typecheck
@@ -2143,7 +2143,7 @@ pnpm typecheck
 
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add proxy.ts
@@ -2159,7 +2159,7 @@ git commit -m "Add auth proxy (renamed from middleware in Next 16)"
 - Create: `app/login/page.tsx`
 - Create: `components/auth/UserPicker.tsx`
 
-- [ ] **Step 1: Implement the client component**
+- [x] **Step 1: Implement the client component**
 
 Create `components/auth/UserPicker.tsx`:
 
@@ -2265,7 +2265,7 @@ export function UserPicker() {
 }
 ```
 
-- [ ] **Step 2: Implement the route**
+- [x] **Step 2: Implement the route**
 
 Create `app/login/page.tsx`:
 
@@ -2281,7 +2281,7 @@ export default function LoginPage() {
 }
 ```
 
-- [ ] **Step 3: Typecheck + commit**
+- [x] **Step 3: Typecheck + commit**
 
 ```bash
 pnpm typecheck
@@ -2303,7 +2303,7 @@ This is a single client page that:
 2. Lets the admin either pick an existing user (to add a device) or enter `{ username, displayName, emoji }` for a new user.
 3. Calls the register options endpoint, triggers `startRegistration`, calls the verify endpoint.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
 
 Create `app/register/page.tsx`:
 
@@ -2484,7 +2484,7 @@ export default function RegisterPage() {
 }
 ```
 
-- [ ] **Step 2: Typecheck + commit**
+- [x] **Step 2: Typecheck + commit**
 
 ```bash
 pnpm typecheck
@@ -2501,7 +2501,7 @@ git commit -m "Add admin-gated register page"
 - Modify: `app/layout.tsx`
 - Create: `components/auth/UserPill.tsx`
 
-- [ ] **Step 1: Implement the pill**
+- [x] **Step 1: Implement the pill**
 
 Create `components/auth/UserPill.tsx`:
 
@@ -2547,7 +2547,7 @@ export function SignOutButton() {
 }
 ```
 
-- [ ] **Step 2: Update root layout**
+- [x] **Step 2: Update root layout**
 
 Replace `app/layout.tsx` with:
 
@@ -2579,7 +2579,7 @@ export default function RootLayout({
 }
 ```
 
-- [ ] **Step 3: Typecheck + commit**
+- [x] **Step 3: Typecheck + commit**
 
 ```bash
 pnpm typecheck
@@ -2596,7 +2596,7 @@ git commit -m "Add root layout with user pill"
 - Replace: `app/page.tsx`
 - Create: `components/hub/FeatureTile.tsx`
 
-- [ ] **Step 1: Implement FeatureTile**
+- [x] **Step 1: Implement FeatureTile**
 
 Create `components/hub/FeatureTile.tsx`:
 
@@ -2638,7 +2638,7 @@ export function FeatureTile({
 }
 ```
 
-- [ ] **Step 2: Replace `app/page.tsx`**
+- [x] **Step 2: Replace `app/page.tsx`**
 
 ```tsx
 import { FeatureTile } from '@/components/hub/FeatureTile';
@@ -2661,7 +2661,7 @@ export default function HubPage() {
 }
 ```
 
-- [ ] **Step 3: Typecheck + commit**
+- [x] **Step 3: Typecheck + commit**
 
 ```bash
 pnpm typecheck
@@ -2675,7 +2675,7 @@ git commit -m "Add hub page with coming-soon draw tile"
 
 **Files:** none (just verification).
 
-- [ ] **Step 1: Run format check + tests + lint + typecheck in one pass**
+- [x] **Step 1: Run format check + tests + lint + typecheck in one pass**
 
 ```bash
 pnpm format:check && pnpm test:run && pnpm typecheck && pnpm lint
@@ -2683,7 +2683,7 @@ pnpm format:check && pnpm test:run && pnpm typecheck && pnpm lint
 
 Expected: every command exits 0. If format:check fails, run `pnpm format` and commit the formatting fixes separately. If anything else fails, fix it in place rather than skipping.
 
-- [ ] **Step 2: Commit any fixes**
+- [x] **Step 2: Commit any fixes**
 
 If fixes were needed, commit them with `git commit -m "Fix issues found by full-suite run"`.
 
@@ -2695,7 +2695,7 @@ If fixes were needed, commit them with `git commit -m "Fix issues found by full-
 
 This is done against the deployed preview (or locally with a tunnel such as `vercel dev` on an https dev URL — WebAuthn requires either HTTPS or `localhost`).
 
-- [ ] **Step 1: Deploy to a Vercel preview environment**
+- [x] **Step 1: Deploy to a Vercel preview environment**
 
 ```bash
 vercel deploy
@@ -2703,31 +2703,31 @@ vercel deploy
 
 Set env vars via the Vercel dashboard or CLI: `WEBAUTHN_RP_ID` (the preview domain), `WEBAUTHN_ORIGIN` (full URL including https), `WEBAUTHN_RP_NAME`, `ADMIN_SECRET`. Install the **Upstash Redis** integration from the Vercel Marketplace (Storage → Marketplace → Upstash Redis); it auto-provisions `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
 
-- [ ] **Step 2: Register the admin (dad) first on a desktop**
+- [x] **Step 2: Register the admin (dad) first on a desktop**
 
 Visit `https://<preview>/register?secret=<ADMIN_SECRET>`. Pick "New user", enter `{ username: "dad", displayName: "Dad", emoji: "👨‍💻" }`. Confirm the OS biometric prompt completes. Expect "registered!" status.
 
-- [ ] **Step 3: Register Henry on the iPad**
+- [x] **Step 3: Register Henry on the iPad**
 
 On Henry's iPad, visit `https://<preview>/register?secret=<ADMIN_SECRET>`. Pick "New user", enter `{ username: "henry", displayName: "Henry", emoji: "🦖" }`. Touch ID prompt appears; approve. Expect "registered!".
 
-- [ ] **Step 4: Sign Henry in**
+- [x] **Step 4: Sign Henry in**
 
 On Henry's iPad, visit `https://<preview>/login`. Henry's tile should be enabled (hasPasskey=true). Tap it. Touch ID prompts. On success, redirected to `/`, with "🦖 Henry" pill in the top-right and a "Draw — coming soon" tile in the main area.
 
-- [ ] **Step 5: Sign out**
+- [x] **Step 5: Sign out**
 
 Tap "sign out" in the pill. Expect redirect to `/login`.
 
-- [ ] **Step 6: Verify the auth gate holds**
+- [x] **Step 6: Verify the auth gate holds**
 
 With no cookie (fresh incognito tab), visit `https://<preview>/`. Expect redirect to `/login`.
 
-- [ ] **Step 7: Verify the admin gate holds**
+- [x] **Step 7: Verify the admin gate holds**
 
 Visit `https://<preview>/register` with no `?secret=` — the UI renders, but clicking the register button returns 403 with "forbidden". Visit with a wrong secret — same result.
 
-- [ ] **Step 8: Verify cross-device passkey works**
+- [x] **Step 8: Verify cross-device passkey works**
 
 On dad's laptop, visit `https://<preview>/register?secret=<ADMIN_SECRET>`. Pick "Existing user" → Henry, trigger the registration ceremony (a new passkey will be added for Henry on the laptop). Sign out and sign back in as Henry on the laptop — expect success.
 
