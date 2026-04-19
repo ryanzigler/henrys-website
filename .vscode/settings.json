@@ -1,0 +1,46 @@
+{
+  /**
+   * Enable code actions on save
+   */
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  /**
+   * Use Prettier as the default formatter for all compatible files
+   */
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  /**
+   * Format on save
+   */
+  "editor.formatOnSave": true,
+
+  /**
+   * Enable quick suggestions for strings which is useful for Tailwind CSS classes
+   */
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+
+  /**
+   * Enable file associations for CSS, SVG, and HTML files
+   * - Associating SVG files with HTML will allow Prettier to format the SVG
+   */
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.svg": "html"
+  },
+
+  /**
+   * Add TailwindCSS IntelliSense for the `cva` and `cx` functions.
+   */
+  "tailwindCSS.classFunctions": ["cva", "cx"],
+
+  /**
+   * Allows the use of Tailwind's utility classses in Emmet completions,
+   * E.g. `div.bg-red-500.uppercase` will be expanded to `<div class="bg-red-500 uppercase"></div>`.
+   */
+  "tailwindCSS.emmetCompletions": true
+}

@@ -1,8 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { getWebAuthnConfig } from './webauthn-config';
+import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
 
 describe('webauthn-config', () => {
   const originalEnv = { ...process.env };
+
   afterEach(() => {
     process.env = { ...originalEnv };
   });

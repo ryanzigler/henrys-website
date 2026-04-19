@@ -1,30 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createUser } from '@/lib/auth/users';
+import { GET } from '@/app/api/users/route';
 
 const { fakeKv } = await vi.hoisted(async () => {
   const { FakeKV } =
-    await vi.importActual<typeof import('@/lib/kv')>('@/lib/kv');
+    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
+
   return { fakeKv: new FakeKV() };
 });
+
 vi.mock('@/lib/kv', async () => {
   const actual = await vi.importActual<typeof import('@/lib/kv')>('@/lib/kv');
   return { ...actual, kv: fakeKv };
 });
 
-import { createUser } from '@/lib/auth/users';
-import { GET } from './route';
-
-function resetKv() {
-  (
-    fakeKv as unknown as {
-      store: Map<string, unknown>;
-      sets: Map<string, Set<string>>;
-    }
-  ).store.clear();
-  (fakeKv as unknown as { sets: Map<string, Set<string>> }).sets.clear();
-}
-
 describe('GET /api/users', () => {
-  beforeEach(() => resetKv());
+  beforeEach(() => fakeKv.reset());
 
   it('returns empty array when no users exist', async () => {
     const res = await GET();

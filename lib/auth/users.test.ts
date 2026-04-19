@@ -1,28 +1,24 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  createUser,
+  getUser,
+  listUsers,
+  getPublicUsers,
+} from '@/lib/auth/users';
 
 const { fakeKv } = await vi.hoisted(async () => {
-  const { FakeKV } = await vi.importActual<typeof import('../kv')>('../kv');
+  const { FakeKV } =
+    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
   return { fakeKv: new FakeKV() };
 });
-vi.mock('../kv', async () => {
-  const actual = await vi.importActual<typeof import('../kv')>('../kv');
+
+vi.mock('@/lib/kv', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/kv')>('@/lib/kv');
   return { ...actual, kv: fakeKv };
 });
 
-import { createUser, getUser, listUsers, getPublicUsers } from './users';
-
-function resetKv() {
-  (
-    fakeKv as unknown as {
-      store: Map<string, unknown>;
-      sets: Map<string, Set<string>>;
-    }
-  ).store.clear();
-  (fakeKv as unknown as { sets: Map<string, Set<string>> }).sets.clear();
-}
-
 describe('users', () => {
-  beforeEach(() => resetKv());
+  beforeEach(() => fakeKv.reset());
 
   it('createUser persists and can be read back', async () => {
     const u = await createUser({

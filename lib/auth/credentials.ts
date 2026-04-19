@@ -20,12 +20,16 @@ const userCredentialsKey = (userId: string) => `user:${userId}:credentials`;
 const encodePublicKey = (bytes: Uint8Array) =>
   Buffer.from(bytes).toString('base64');
 
-const decodePublicKey = (b64: string) => {
-  const buf = Buffer.from(b64, 'base64');
-  const out = new Uint8Array(buf.length);
-  out.set(buf);
-  return out;
-};
+const decodePublicKey = (base64: string) =>
+  Uint8Array.from(Buffer.from(base64, 'base64'));
+
+const fromStored = ({
+  publicKeyBase64,
+  ...rest
+}: StoredCredential): Credential => ({
+  ...rest,
+  publicKey: decodePublicKey(publicKeyBase64),
+});
 
 export const saveCredential = async (input: {
   id: string;
@@ -48,17 +52,20 @@ export const saveCredential = async (input: {
   ]);
 };
 
-export const getCredential = async (id: string): Promise<Credential | null> => {
+export const getCredential = async (id: string) => {
   const stored = await kv.get<StoredCredential>(credentialKey(id));
-  if (!stored) return null;
-  const { publicKeyBase64, ...rest } = stored;
-  return { ...rest, publicKey: decodePublicKey(publicKeyBase64) };
+  return stored ? fromStored(stored) : null;
 };
 
 export const listCredentialsForUser = async (userId: string) => {
   const ids = await kv.smembers(userCredentialsKey(userId));
-  const creds = await Promise.all(ids.map((id) => getCredential(id)));
-  return creds.filter((c): c is Credential => c !== null);
+  if (ids.length === 0) return [];
+
+  const stored = await kv.mget<(StoredCredential | null)[]>(
+    ...ids.map(credentialKey),
+  );
+
+  return stored.flatMap((entry) => (entry ? [fromStored(entry)] : []));
 };
 
 export const countCredentialsForUser = (userId: string) =>
@@ -72,6 +79,5 @@ export const updateCredentialCounter = async (
   if (!stored) {
     throw new Error(`credential ${id} missing during counter update`);
   }
-  stored.counter = newCounter;
-  await kv.set(credentialKey(id), stored);
+  await kv.set(credentialKey(id), { ...stored, counter: newCounter });
 };

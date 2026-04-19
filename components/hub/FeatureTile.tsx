@@ -8,9 +8,6 @@ interface Props {
   comingSoonLabel?: string;
 }
 
-const BASE =
-  'flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition';
-
 export const FeatureTile = ({
   title,
   emoji,
@@ -30,13 +27,19 @@ export const FeatureTile = ({
 
   if (disabled) {
     return (
-      <div className={`${BASE} opacity-60`} aria-disabled="true">
+      <div
+        className="flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white opacity-60 shadow-lg transition"
+        aria-disabled="true"
+      >
         {body}
       </div>
     );
   }
   return (
-    <Link href={href} className={`${BASE} active:scale-95`}>
+    <Link
+      href={href}
+      className="flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition active:scale-95"
+    >
       {body}
     </Link>
   );

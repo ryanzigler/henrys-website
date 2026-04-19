@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { randomToken } from './random';
+import { randomToken } from '@/lib/random';
 
 describe('randomToken', () => {
   it('returns a hex string of the expected length', () => {

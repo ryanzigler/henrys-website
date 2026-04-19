@@ -10,13 +10,13 @@ import { createSession, setSessionCookie } from '@/lib/auth/sessions';
 import { getUser } from '@/lib/auth/users';
 import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
 
-type Body = {
+interface LoginVerifyBody {
   challengeId?: string;
   response?: AuthenticationResponseJSON;
-};
+}
 
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as Body;
+export const POST = async (req: Request) => {
+  const body = (await req.json().catch(() => ({}))) as LoginVerifyBody;
   if (!body.challengeId || !body.response) {
     return NextResponse.json(
       { error: 'challengeId and response required' },
@@ -24,15 +24,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const challenge = await consumeChallenge(body.challengeId);
+  const [challenge, credential] = await Promise.all([
+    consumeChallenge(body.challengeId),
+    getCredential(body.response.id),
+  ]);
   if (!challenge || challenge.kind !== 'login') {
     return NextResponse.json(
       { error: 'challenge not found or expired' },
       { status: 400 },
     );
   }
-
-  const credential = await getCredential(body.response.id);
   if (!credential || credential.userId !== challenge.userId) {
     return NextResponse.json({ error: 'unknown credential' }, { status: 400 });
   }
@@ -79,4 +80,4 @@ export async function POST(req: Request) {
   await setSessionCookie(sessionId);
 
   return NextResponse.json({ ok: true });
-}
+};

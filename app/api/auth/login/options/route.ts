@@ -5,15 +5,21 @@ import { listCredentialsForUser } from '@/lib/auth/credentials';
 import { saveChallenge } from '@/lib/auth/challenges';
 import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
 
-export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const userId: string | undefined = body?.userId;
-  if (!userId)
+interface LoginOptionsBody {
+  userId?: string;
+}
+
+export const POST = async (req: Request) => {
+  const { userId } = (await req.json().catch(() => ({}))) as LoginOptionsBody;
+
+  if (!userId) {
     return NextResponse.json({ error: 'userId required' }, { status: 400 });
+  }
 
   const user = await getUser(userId);
-  if (!user)
+  if (!user) {
     return NextResponse.json({ error: 'unknown user' }, { status: 404 });
+  }
 
   const creds = await listCredentialsForUser(userId);
   if (creds.length === 0) {
@@ -27,9 +33,9 @@ export async function POST(req: Request) {
   const options = await generateAuthenticationOptions({
     rpID,
     userVerification: 'required',
-    allowCredentials: creds.map((c) => ({
-      id: c.id,
-      transports: c.transports,
+    allowCredentials: creds.map((cred) => ({
+      id: cred.id,
+      transports: cred.transports,
     })),
   });
 
@@ -40,4 +46,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ challengeId, options });
-}
+};

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { isAdminRequest } from './admin';
+import { isAdminRequest } from '@/lib/auth/admin';
 
 describe('isAdminRequest', () => {
   const originalEnv = { ...process.env };

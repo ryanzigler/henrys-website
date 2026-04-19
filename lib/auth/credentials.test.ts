@@ -1,33 +1,24 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-
-const { fakeKv } = await vi.hoisted(async () => {
-  const { FakeKV } = await vi.importActual<typeof import('../kv')>('../kv');
-  return { fakeKv: new FakeKV() };
-});
-vi.mock('../kv', async () => {
-  const actual = await vi.importActual<typeof import('../kv')>('../kv');
-  return { ...actual, kv: fakeKv };
-});
-
 import {
   saveCredential,
   getCredential,
   listCredentialsForUser,
   updateCredentialCounter,
-} from './credentials';
+} from '@/lib/auth/credentials';
 
-function resetKv() {
-  (
-    fakeKv as unknown as {
-      store: Map<string, unknown>;
-      sets: Map<string, Set<string>>;
-    }
-  ).store.clear();
-  (fakeKv as unknown as { sets: Map<string, Set<string>> }).sets.clear();
-}
+const { fakeKv } = await vi.hoisted(async () => {
+  const { FakeKV } =
+    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
+  return { fakeKv: new FakeKV() };
+});
+
+vi.mock('@/lib/kv', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/kv')>('@/lib/kv');
+  return { ...actual, kv: fakeKv };
+});
 
 describe('credentials', () => {
-  beforeEach(() => resetKv());
+  beforeEach(() => fakeKv.reset());
 
   it('save + getCredential round-trips', async () => {
     const pk = new Uint8Array([1, 2, 3, 4]);
@@ -48,18 +39,21 @@ describe('credentials', () => {
 
   it('listCredentialsForUser returns all credentials for a user', async () => {
     const pk = new Uint8Array([0]);
+
     await saveCredential({
       userId: 'u_1',
       id: 'c1',
       publicKey: pk,
       counter: 0,
     });
+
     await saveCredential({
       userId: 'u_1',
       id: 'c2',
       publicKey: pk,
       counter: 0,
     });
+
     await saveCredential({
       userId: 'u_2',
       id: 'c3',
@@ -74,13 +68,16 @@ describe('credentials', () => {
 
   it('updateCredentialCounter bumps the counter', async () => {
     const pk = new Uint8Array([0]);
+
     await saveCredential({
       userId: 'u_1',
       id: 'c1',
       publicKey: pk,
       counter: 0,
     });
+
     await updateCredentialCounter('c1', 5);
+
     const got = await getCredential('c1');
     expect(got!.counter).toBe(5);
   });

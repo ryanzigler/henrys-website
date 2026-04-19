@@ -6,40 +6,44 @@ import { listCredentialsForUser } from '@/lib/auth/credentials';
 import { saveChallenge } from '@/lib/auth/challenges';
 import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
 
-type Body =
-  | { userId: string }
-  | { username: string; displayName: string; emoji: string };
+interface RegisterBody {
+  userId?: string;
+  username?: string;
+  displayName?: string;
+  emoji?: string;
+}
 
-export async function POST(req: Request) {
+const resolveUser = async (body: RegisterBody) => {
+  if (body.userId) {
+    const existing = await getUser(body.userId);
+    return (
+      existing ?? NextResponse.json({ error: 'unknown user' }, { status: 404 })
+    );
+  }
+
+  if (body.username && body.displayName && body.emoji) {
+    return createUser({
+      username: body.username,
+      displayName: body.displayName,
+      emoji: body.emoji,
+    });
+  }
+
+  return NextResponse.json(
+    { error: 'must include { userId } or { username, displayName, emoji }' },
+    { status: 400 },
+  );
+};
+
+export const POST = async (req: Request) => {
   const url = new URL(req.url);
   if (!isAdminRequest(url)) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as Partial<Body>;
-
-  let user: Awaited<ReturnType<typeof getUser>>;
-  if ('userId' in body && body.userId) {
-    user = await getUser(body.userId);
-    if (!user)
-      return NextResponse.json({ error: 'unknown user' }, { status: 404 });
-  } else if (
-    'username' in body
-    && body.username
-    && body.displayName
-    && body.emoji
-  ) {
-    user = await createUser({
-      username: body.username,
-      displayName: body.displayName,
-      emoji: body.emoji,
-    });
-  } else {
-    return NextResponse.json(
-      { error: 'must include { userId } or { username, displayName, emoji }' },
-      { status: 400 },
-    );
-  }
+  const body = (await req.json().catch(() => ({}))) as RegisterBody;
+  const user = await resolveUser(body);
+  if (user instanceof NextResponse) return user;
 
   const { rpID, rpName } = getWebAuthnConfig();
   const existingCreds = await listCredentialsForUser(user.id);
@@ -68,4 +72,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ challengeId, userId: user.id, options });
-}
+};

@@ -25,10 +25,11 @@ export const createUser = async (input: {
   username: string;
   displayName: string;
   emoji: string;
-}): Promise<User> => {
+}) => {
   const username = input.username.toLowerCase();
   const id = `u_${randomToken(8)}`;
   const claimed = await kv.set(usernameIndexKey(username), id, { nx: true });
+
   if (claimed !== 'OK') {
     throw new Error(`user "${input.username}" already exists`);
   }
@@ -39,7 +40,9 @@ export const createUser = async (input: {
     emoji: input.emoji,
     createdAt: Date.now(),
   };
+
   await Promise.all([kv.set(userKey(id), user), kv.sadd(USERS_SET, id)]);
+
   return user;
 };
 
@@ -49,25 +52,28 @@ export const getUser = async (id: string) =>
 export const listUsers = async () => {
   const ids = await kv.smembers(USERS_SET);
   if (ids.length === 0) return [];
-  const users = await Promise.all(ids.map((id) => getUser(id)));
-  return users.filter((u): u is User => u !== null);
+
+  const users = await kv.mget<(User | null)[]>(...ids.map(userKey));
+  return users.filter((user): user is User => user !== null);
 };
 
-export const getPublicUsers = async (): Promise<PublicUser[]> => {
+export const getPublicUsers = async () => {
   const ids = await kv.smembers(USERS_SET);
   if (ids.length === 0) return [];
+
   const [users, counts] = await Promise.all([
-    Promise.all(ids.map((id) => kv.get<User>(userKey(id)))),
-    Promise.all(ids.map((id) => countCredentialsForUser(id))),
+    kv.mget<(User | null)[]>(...ids.map(userKey)),
+    Promise.all(ids.map(countCredentialsForUser)),
   ]);
-  return users.flatMap((u, i) =>
-    u ?
+
+  return users.flatMap<PublicUser>((user, index) =>
+    user ?
       [
         {
-          id: u.id,
-          displayName: u.displayName,
-          emoji: u.emoji,
-          hasPasskey: counts[i] > 0,
+          id: user.id,
+          displayName: user.displayName,
+          emoji: user.emoji,
+          hasPasskey: counts[index] > 0,
         },
       ]
     : [],

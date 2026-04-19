@@ -4,6 +4,10 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
+## Component Primitives
+
+This project has @base-ui/react installed for component primitives. Before creating a new primitive component, check https://base-ui.com/llms.txt to see if there is a Base-UI component primitive you can use instead.
+
 ## Code Standards
 
 - Prefer TypeScript `interfaces` to `type` declarations

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 import type { PublicUser } from '@/lib/auth/users';
 
-export default function RegisterPage() {
+const RegisterPage = () => {
   const [secret] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     return new URL(window.location.href).searchParams.get('secret');
@@ -19,15 +19,16 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
+    const loadUsers = async () => {
       const res = await fetch('/api/users');
       const body = (await res.json()) as { users: PublicUser[] };
       setUsers(body.users);
       if (body.users.length > 0) setSelectedUserId(body.users[0].id);
-    })();
+    };
+    loadUsers();
   }, []);
 
-  async function register() {
+  const register = async () => {
     if (!secret) {
       setError('Missing ?secret=…');
       return;
@@ -80,7 +81,7 @@ export default function RegisterPage() {
       setError((err as Error).message);
       setStatus(null);
     }
-  }
+  };
 
   return (
     <main className="mx-auto max-w-lg p-8">
@@ -118,9 +119,9 @@ export default function RegisterPage() {
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
           >
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.emoji} {u.displayName}
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.emoji} {user.displayName}
               </option>
             ))}
           </select>
@@ -166,4 +167,6 @@ export default function RegisterPage() {
       {error && <p className="mt-4 text-red-600">Error: {error}</p>}
     </main>
   );
-}
+};
+
+export default RegisterPage;

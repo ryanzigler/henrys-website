@@ -1,25 +1,24 @@
-import type { Metadata } from 'next';
+import '@/app/globals.css';
 import { UserPill } from '@/components/auth/UserPill';
-import './globals.css';
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
   title: "Henry's Website",
   description: 'Stuff Henry made',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body className="min-h-screen bg-sky-50">
+const RootLayout = ({ children }: { children: ReactNode }) => (
+  <html lang="en">
+    <body className="relative min-h-screen bg-sky-50">
+      <div className="root">
         <header className="flex items-center justify-end p-4">
           <UserPill />
         </header>
         {children}
-      </body>
-    </html>
-  );
-}
+      </div>
+    </body>
+  </html>
+);
+
+export default RootLayout;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { FakeKV } from './kv';
+import { FakeKV } from '@/lib/kv.fake';
 
 describe('FakeKV', () => {
   let kv: FakeKV;
@@ -26,6 +26,16 @@ describe('FakeKV', () => {
     await kv.set('x', '1');
     await kv.del('x');
     expect(await kv.get('x')).toBeNull();
+  });
+
+  it('mget returns values in key order, null for misses', async () => {
+    await kv.set('a', 1);
+    await kv.set('c', 3);
+    expect(await kv.mget<(number | null)[]>('a', 'b', 'c')).toEqual([
+      1,
+      null,
+      3,
+    ]);
   });
 
   it('sadd/smembers/srem manage a set', async () => {

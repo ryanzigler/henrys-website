@@ -1,31 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  clearSessionCookie,
+  createSession,
+  destroySession,
+  getSession,
+  getSessionFromCookie,
+  setSessionCookie,
+  SESSION_TTL_SECONDS,
+  verifyCookieValue,
+} from '@/lib/auth/sessions';
 
 const { fakeKv } = await vi.hoisted(async () => {
-  const { FakeKV } = await vi.importActual<typeof import('../kv')>('../kv');
+  const { FakeKV } =
+    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
   return { fakeKv: new FakeKV() };
 });
-vi.mock('../kv', async () => {
-  const actual = await vi.importActual<typeof import('../kv')>('../kv');
+
+vi.mock('@/lib/kv', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/kv')>('@/lib/kv');
   return { ...actual, kv: fakeKv };
 });
 
-import {
-  createSession,
-  getSession,
-  destroySession,
-  verifyCookieValue,
-  SESSION_TTL_SECONDS,
-} from './sessions';
-
 const TEST_USER = { id: 'user-1', displayName: 'Henry', emoji: '🦖' };
 
-const resetKv = () => {
-  (fakeKv as unknown as { store: Map<string, unknown> }).store.clear();
-  (fakeKv as unknown as { sets: Map<string, Set<string>> }).sets.clear();
-};
-
 describe('sessions', () => {
-  beforeEach(resetKv);
+  beforeEach(() => fakeKv.reset());
 
   it('createSession stores a denormalized record and returns an ID', async () => {
     const { sessionId, userId } = await createSession(TEST_USER);
@@ -56,7 +55,6 @@ describe('sessions', () => {
 
 describe('verifyCookieValue', () => {
   it('accepts a cookie signed with the current secret', async () => {
-    const { setSessionCookie } = await import('./sessions');
     const { sessionId } = await createSession(TEST_USER);
     await setSessionCookie(sessionId);
     const stored = cookieStore.get('session');
@@ -77,9 +75,10 @@ describe('verifyCookieValue', () => {
 const cookieStore = new Map<string, string>();
 vi.mock('next/headers', () => ({
   cookies: async () => ({
+    delete: (name: string) => cookieStore.delete(name),
     get: (name: string) => {
-      const v = cookieStore.get(name);
-      return v ? { name, value: v } : undefined;
+      const value = cookieStore.get(name);
+      return value ? { name, value } : undefined;
     },
     set: (
       nameOrObj: string | { name: string; value: string },
@@ -89,14 +88,11 @@ vi.mock('next/headers', () => ({
         cookieStore.set(nameOrObj, value ?? '');
       else cookieStore.set(nameOrObj.name, nameOrObj.value);
     },
-    delete: (name: string) => cookieStore.delete(name),
   }),
 }));
 
 describe('session cookie helpers', () => {
   it('setSessionCookie writes a signed session id that getSessionFromCookie can read', async () => {
-    const { setSessionCookie, getSessionFromCookie, createSession } =
-      await import('./sessions');
     const { sessionId } = await createSession({
       id: 'user-2',
       displayName: 'Two',
@@ -108,8 +104,6 @@ describe('session cookie helpers', () => {
   });
 
   it('clearSessionCookie removes it', async () => {
-    const { clearSessionCookie, getSessionFromCookie } =
-      await import('./sessions');
     await clearSessionCookie();
     expect(await getSessionFromCookie()).toBeNull();
   });
