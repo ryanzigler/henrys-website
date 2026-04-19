@@ -1,23 +1,14 @@
 export const saveBlobToPhotos = async (blob: Blob, filename: string) => {
   const file = new File([blob], filename, { type: 'image/png' });
 
-  // Prefer the share sheet on iOS when it can handle files — that's the path
-  // that surfaces "Save to Photos" alongside AirDrop/Messages.
-  const navigatorWithShare = navigator as Navigator & {
-    canShare?: (data: ShareData) => boolean;
-    share?: (data: ShareData) => Promise<void>;
-  };
-  if (
-    navigatorWithShare.share
-    && navigatorWithShare.canShare
-    && navigatorWithShare.canShare({ files: [file] })
-  ) {
+  if (navigator.canShare?.({ files: [file] })) {
     try {
-      await navigatorWithShare.share({ files: [file], title: filename });
+      await navigator.share({ files: [file], title: filename });
       return;
     } catch (error) {
-      if ((error as { name?: string }).name === 'AbortError') return;
-      // fall through to download
+      if ((error as { name?: string }).name === 'AbortError') {
+        return;
+      }
     }
   }
 
@@ -39,5 +30,6 @@ export const sanitizeFilename = (title: string, id: string) => {
       .replace(/^-+|-+$/g, '')
       .slice(0, 40) || 'untitled';
   const short = id.replace(/^d_/, '').slice(0, 8);
+
   return `${slug}-${short}.png`;
 };

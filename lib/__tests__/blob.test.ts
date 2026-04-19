@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { FakeBlob } from '@/lib/blob';
+import { FakeBlob } from '@/lib/blob.fake';
 
 describe('FakeBlob', () => {
   let blob: FakeBlob;

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { BRUSHES, BRUSH_LIST } from '@/components/draw/brushes';
+import { BRUSHES, BRUSH_LIST } from '@/lib/drawing/brushes';
+import { describe, expect, it } from 'vitest';
 
 describe('brush presets', () => {
   it('defines all four brushes', () => {
@@ -9,6 +9,7 @@ describe('brush presets', () => {
   it('each preset has well-formed options', () => {
     for (const brush of BRUSH_LIST) {
       const preset = BRUSHES[brush];
+
       expect(typeof preset.options.size).toBe('number');
       expect(typeof preset.options.thinning).toBe('number');
       expect(['source-over', 'destination-out']).toContain(preset.composite);

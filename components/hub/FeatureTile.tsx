@@ -1,46 +1,36 @@
+import { cx } from '@/cva.config';
 import Link from 'next/link';
 
-interface Props {
-  title: string;
+interface FeatureTileProps {
+  comingSoonLabel?: string;
+  disabled?: boolean;
   emoji: string;
   href: string;
-  disabled?: boolean;
-  comingSoonLabel?: string;
+  title: string;
 }
 
 export const FeatureTile = ({
-  title,
+  comingSoonLabel,
+  disabled,
   emoji,
   href,
-  disabled,
-  comingSoonLabel,
-}: Props) => {
-  const body = (
-    <>
-      <span className="text-6xl">{emoji}</span>
-      <span className="text-lg font-semibold">{title}</span>
-      {disabled && comingSoonLabel && (
-        <span className="text-xs">{comingSoonLabel}</span>
-      )}
-    </>
-  );
-
-  if (disabled) {
-    return (
-      <div
-        className="flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white opacity-60 shadow-lg transition"
-        aria-disabled="true"
-      >
-        {body}
-      </div>
-    );
-  }
-  return (
-    <Link
-      href={href}
-      className="flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition active:scale-95"
-    >
-      {body}
-    </Link>
-  );
-};
+  title,
+}: FeatureTileProps) => (
+  <Link
+    aria-disabled={disabled}
+    href={disabled ? '#' : href}
+    className={cx(
+      'flex h-48 w-48 flex-col items-center justify-center gap-3 rounded-3xl bg-white shadow-lg transition',
+      {
+        'active:scale-95': !disabled,
+        'opacity-60': disabled,
+      },
+    )}
+  >
+    <span className="text-6xl">{emoji}</span>
+    <span className="text-lg font-semibold">{title}</span>
+    {disabled && comingSoonLabel && (
+      <span className="text-xs">{comingSoonLabel}</span>
+    )}
+  </Link>
+);

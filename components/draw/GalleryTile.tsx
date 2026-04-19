@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import type { DrawingMeta } from '@/lib/drawing/types';
 import { GalleryActions } from '@/components/draw/GalleryActions';
+import type { DrawingMeta } from '@/types/drawing';
+import Link from 'next/link';
 
 const formatDate = (timestamp: number) =>
   new Date(timestamp).toLocaleDateString(undefined, {
@@ -11,8 +11,8 @@ const formatDate = (timestamp: number) =>
 export const GalleryTile = ({ meta }: { meta: DrawingMeta }) => (
   <div className="flex w-48 flex-col rounded-3xl bg-white p-3 shadow-lg">
     <Link
-      href={`/draw/${meta.id}`}
       className="flex h-36 items-center justify-center rounded-xl bg-sky-50"
+      href={`/draw/${meta.id}`}
     >
       {meta.blobPngUrl ?
         // eslint-disable-next-line @next/next/no-img-element

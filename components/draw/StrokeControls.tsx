@@ -1,5 +1,6 @@
 'use client';
 
+import { cx } from '@/cva.config';
 import { Button } from '@base-ui/react';
 import { useState } from 'react';
 
@@ -18,23 +19,23 @@ const PRESET_COLORS = [
   '#757575',
 ];
 
-interface Props {
-  size: number;
-  opacity: number;
+interface StrokeControlProps {
   color: string;
-  onSizeChange: (size: number) => void;
-  onOpacityChange: (opacity: number) => void;
   onColorChange: (color: string) => void;
+  onOpacityChange: (opacity: number) => void;
+  onSizeChange: (size: number) => void;
+  opacity: number;
+  size: number;
 }
 
 export const StrokeControls = ({
-  size,
-  opacity,
   color,
-  onSizeChange,
-  onOpacityChange,
   onColorChange,
-}: Props) => {
+  onOpacityChange,
+  onSizeChange,
+  opacity,
+  size,
+}: StrokeControlProps) => {
   const [recentColors, setRecentColors] = useState<string[]>([]);
 
   const pickColor = (chosen: string) => {
@@ -49,12 +50,12 @@ export const StrokeControls = ({
       <label className="block">
         <span className="text-xs font-semibold">Size: {size}</span>
         <input
-          type="range"
-          min={1}
-          max={60}
-          value={size}
-          onChange={(event) => onSizeChange(Number(event.target.value))}
           className="mt-1 w-full"
+          max={60}
+          min={1}
+          onChange={(event) => onSizeChange(Number(event.target.value))}
+          type="range"
+          value={size}
         />
       </label>
       <label className="block">
@@ -62,14 +63,14 @@ export const StrokeControls = ({
           Opacity: {Math.round(opacity * 100)}%
         </span>
         <input
-          type="range"
-          min={10}
+          className="mt-1 w-full"
           max={100}
-          value={opacity * 100}
+          min={10}
           onChange={(event) =>
             onOpacityChange(Number(event.target.value) / 100)
           }
-          className="mt-1 w-full"
+          type="range"
+          value={opacity * 100}
         />
       </label>
       <div>
@@ -77,30 +78,32 @@ export const StrokeControls = ({
         <div className="mt-1 grid grid-cols-6 gap-1">
           {PRESET_COLORS.map((presetColor) => (
             <Button
-              key={presetColor}
               aria-label={presetColor}
+              className={cx(
+                'h-8 w-8 rounded-full border',
+                color === presetColor && 'ring-2 ring-black',
+              )}
+              key={presetColor}
               onClick={() => pickColor(presetColor)}
-              className={`h-8 w-8 rounded-full border ${
-                color === presetColor ? 'ring-2 ring-black' : ''
-              }`}
               style={{ background: presetColor }}
             />
           ))}
         </div>
         <input
+          aria-label="custom color"
+          className="mt-2 h-8 w-full"
+          onChange={(event) => pickColor(event.target.value)}
           type="color"
           value={color}
-          onChange={(event) => pickColor(event.target.value)}
-          className="mt-2 h-8 w-full"
-          aria-label="custom color"
         />
         {recentColors.length > 0 && (
           <div className="mt-2 flex gap-1" aria-label="Recent colors">
             {recentColors.map((recentColor) => (
               <Button
+                aria-label={recentColor}
+                className="h-6 w-6 rounded-full border"
                 key={recentColor}
                 onClick={() => pickColor(recentColor)}
-                className="h-6 w-6 rounded-full border"
                 style={{ background: recentColor }}
               />
             ))}

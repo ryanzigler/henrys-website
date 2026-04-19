@@ -1,12 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  isDrawingNotFoundError,
+  isNotOwnerError,
+  requireOwnedDrawing,
+} from '@/lib/drawing/authorization';
+import { createDrawing } from '@/lib/drawing/storage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { fakeKv, fakeBlob } = await vi.hoisted(async () => {
-  const { FakeKV } =
-    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
-  const { FakeBlob } =
-    await vi.importActual<typeof import('@/lib/blob')>('@/lib/blob');
-  return { fakeKv: new FakeKV(), fakeBlob: new FakeBlob() };
-});
+const { fakeKv, fakeBlob, reset } = await vi.hoisted(() =>
+  import('@/lib/drawing/harness.fake').then((mod) => mod.makeDrawingHarness()),
+);
 
 vi.mock('@/lib/kv', () => ({ kv: fakeKv }));
 vi.mock('@/lib/blob', async () => {
@@ -15,20 +17,8 @@ vi.mock('@/lib/blob', async () => {
   return { ...actual, blobStore: fakeBlob };
 });
 
-import { createDrawing } from '@/lib/drawing/storage';
-import {
-  requireOwnedDrawing,
-  DrawingNotFoundError,
-  NotOwnerError,
-} from '@/lib/drawing/authorization';
-
-const resetStores = () => {
-  fakeKv.reset();
-  fakeBlob.reset();
-};
-
 describe('requireOwnedDrawing', () => {
-  beforeEach(() => resetStores());
+  beforeEach(() => reset());
 
   it('returns the drawing for its owner', async () => {
     const drawing = await createDrawing('u_owner');
@@ -42,12 +32,12 @@ describe('requireOwnedDrawing', () => {
     const drawing = await createDrawing('u_owner');
     await expect(
       requireOwnedDrawing(drawing.id, { userId: 'u_intruder' }),
-    ).rejects.toBeInstanceOf(NotOwnerError);
+    ).rejects.toSatisfy(isNotOwnerError);
   });
 
   it('throws DrawingNotFoundError for an unknown id', async () => {
     await expect(
       requireOwnedDrawing('d_missing', { userId: 'u_owner' }),
-    ).rejects.toBeInstanceOf(DrawingNotFoundError);
+    ).rejects.toSatisfy(isDrawingNotFoundError);
   });
 });

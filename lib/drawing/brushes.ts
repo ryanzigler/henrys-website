@@ -1,4 +1,4 @@
-import type { Brush } from '@/lib/drawing/types';
+import type { Brush } from '@/types/drawing';
 
 export interface BrushOptions {
   size: number;

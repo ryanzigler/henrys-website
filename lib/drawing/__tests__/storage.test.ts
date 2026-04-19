@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  createDrawing,
+  getDrawing,
+  listUserDrawings,
+} from '@/lib/drawing/storage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { fakeKv, fakeBlob } = await vi.hoisted(async () => {
-  const { FakeKV } =
-    await vi.importActual<typeof import('@/lib/kv.fake')>('@/lib/kv.fake');
-  const { FakeBlob } =
-    await vi.importActual<typeof import('@/lib/blob')>('@/lib/blob');
-  return { fakeKv: new FakeKV(), fakeBlob: new FakeBlob() };
-});
+const { fakeKv, fakeBlob, reset } = await vi.hoisted(() =>
+  import('@/lib/drawing/harness.fake').then((mod) => mod.makeDrawingHarness()),
+);
 
 vi.mock('@/lib/kv', () => ({ kv: fakeKv }));
 vi.mock('@/lib/blob', async () => {
@@ -15,19 +16,8 @@ vi.mock('@/lib/blob', async () => {
   return { ...actual, blobStore: fakeBlob };
 });
 
-import {
-  createDrawing,
-  getDrawing,
-  listUserDrawings,
-} from '@/lib/drawing/storage';
-
-const resetStores = () => {
-  fakeKv.reset();
-  fakeBlob.reset();
-};
-
 describe('drawing storage — create + get', () => {
-  beforeEach(() => resetStores());
+  beforeEach(() => reset());
 
   it('createDrawing persists meta + empty strokes JSON, adds to user index', async () => {
     const drawing = await createDrawing('u_1');
@@ -51,14 +41,14 @@ describe('drawing storage — create + get', () => {
 });
 
 import {
-  updateDrawing,
   deleteDrawing,
+  isStaleWriteError,
   listDrawings,
-  StaleWriteError,
+  updateDrawing,
 } from '@/lib/drawing/storage';
 
 describe('drawing storage — update/delete/list', () => {
-  beforeEach(() => resetStores());
+  beforeEach(() => reset());
 
   it('updateDrawing patches title + strokes and bumps updatedAt', async () => {
     const drawing = await createDrawing('u_1');
@@ -100,7 +90,7 @@ describe('drawing storage — update/delete/list', () => {
         title: 'v3',
         expectedUpdatedAt: drawing.updatedAt,
       }),
-    ).rejects.toBeInstanceOf(StaleWriteError);
+    ).rejects.toSatisfy(isStaleWriteError);
   });
 
   it('deleteDrawing removes meta, blobs, and user index entry', async () => {

@@ -1,33 +1,36 @@
-import { notFound } from 'next/navigation';
+import { Editor } from '@/components/draw/Editor';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 import {
+  isDrawingNotFoundError,
+  isNotOwnerError,
   requireOwnedDrawing,
-  NotOwnerError,
-  DrawingNotFoundError,
 } from '@/lib/drawing/authorization';
-import { Editor } from '@/components/draw/Editor';
+import { notFound } from 'next/navigation';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function DrawEditorPage({ params }: PageProps) {
+const loadOwnedDrawing = async (id: string, session: { userId: string }) => {
+  try {
+    return await requireOwnedDrawing(id, session);
+  } catch (error) {
+    if (isDrawingNotFoundError(error) || isNotOwnerError(error)) {
+      notFound();
+    }
+    throw error;
+  }
+};
+
+const DrawEditorPage = async ({ params }: PageProps) => {
   const session = await getSessionFromCookie();
-  if (!session) notFound(); // proxy.ts should have redirected; belt-and-suspenders
+  // proxy.ts should have redirected; belt-and-suspenders
+  if (!session) notFound();
 
   const { id } = await params;
-  const drawing = await (async () => {
-    try {
-      return await requireOwnedDrawing(id, session);
-    } catch (error) {
-      if (
-        error instanceof DrawingNotFoundError
-        || error instanceof NotOwnerError
-      ) {
-        notFound();
-      }
-      throw error;
-    }
-  })();
+  const drawing = await loadOwnedDrawing(id, session);
+
   return <Editor drawing={drawing} />;
-}
+};
+
+export default DrawEditorPage;

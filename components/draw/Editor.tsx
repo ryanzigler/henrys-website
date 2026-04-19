@@ -1,95 +1,97 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import type { Drawing, Brush } from '@/lib/drawing/types';
+import { BrushRail } from '@/components/draw/BrushRail';
 import {
   Canvas,
   type CanvasHandle,
   type StrokeControls,
 } from '@/components/draw/Canvas';
-import { BrushRail } from '@/components/draw/BrushRail';
 import { StrokeControls as StrokeControlsPanel } from '@/components/draw/StrokeControls';
 import { Toolbar } from '@/components/draw/Toolbar';
-import {
-  sanitizeFilename,
-  saveBlobToPhotos,
-} from '@/components/draw/saveToPhotos';
+import { sanitizeFilename, saveBlobToPhotos } from '@/lib/drawing/saveToPhotos';
+import type { Drawing, SaveState } from '@/types/drawing';
+import { useRef, useState } from 'react';
 
-interface Props {
+interface EditorProps {
   drawing: Drawing;
 }
 
-export const Editor = ({ drawing }: Props) => {
-  const canvasRef = useRef<CanvasHandle>(null);
+const DEFAULT_CONTROLS: StrokeControls = {
+  brush: 'pen',
+  color: '#000000',
+  opacity: 1,
+  size: 8,
+};
+
+export const Editor = ({ drawing }: EditorProps) => {
+  const canvasRef = useRef<CanvasHandle | null>(null);
   const [title, setTitle] = useState(drawing.title);
-  const [saveState, setSaveState] = useState<
-    'idle' | 'saving' | 'saved' | 'error'
-  >('idle');
-  const [controls, setControls] = useState<StrokeControls>({
-    brush: 'pen' as Brush,
-    size: 8,
-    opacity: 1,
-    color: '#000000',
-  });
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [controls, setControls] = useState<StrokeControls>(DEFAULT_CONTROLS);
+
+  const updateControl = <TKey extends keyof StrokeControls>(
+    key: TKey,
+    value: StrokeControls[TKey],
+  ) => setControls((current) => ({ ...current, [key]: value }));
 
   const commitTitle = async () => {
-    if (title === drawing.title) return;
+    if (title === drawing.title) {
+      return;
+    }
+
     setSaveState('saving');
+
     const response = await fetch(`/api/drawings/${drawing.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ title }),
     });
+
     setSaveState(response.ok ? 'saved' : 'error');
   };
 
   const onSaveToPhotos = async () => {
     const blob = await canvasRef.current?.exportFullResBlob();
-    if (!blob) return;
+    if (!blob) {
+      return;
+    }
+
     await saveBlobToPhotos(blob, sanitizeFilename(title, drawing.id));
   };
 
   return (
     <div className="mx-auto flex max-w-360 flex-col gap-4 p-4">
       <Toolbar
-        title={title}
+        onClear={() => canvasRef.current?.clear()}
+        onRedo={() => canvasRef.current?.redo()}
+        onSaveToPhotos={onSaveToPhotos}
         onTitleChange={setTitle}
         onTitleCommit={commitTitle}
         onUndo={() => canvasRef.current?.undo()}
-        onRedo={() => canvasRef.current?.redo()}
-        onClear={() => canvasRef.current?.clear()}
-        onSaveToPhotos={onSaveToPhotos}
         saveState={saveState}
+        title={title}
       />
       <div className="flex gap-4">
         <BrushRail
+          onChange={(brush) => updateControl('brush', brush)}
           value={controls.brush}
-          onChange={(brush) =>
-            setControls((current) => ({ ...current, brush }))
-          }
         />
         <div className="flex-1 overflow-auto">
           <Canvas
-            ref={canvasRef}
+            controls={controls}
             drawingId={drawing.id}
             initialStrokes={drawing.strokes}
-            controls={controls}
             onSaveStateChange={setSaveState}
+            ref={canvasRef}
           />
         </div>
         <StrokeControlsPanel
-          size={controls.size}
-          opacity={controls.opacity}
           color={controls.color}
-          onSizeChange={(size) =>
-            setControls((current) => ({ ...current, size }))
-          }
-          onOpacityChange={(opacity) =>
-            setControls((current) => ({ ...current, opacity }))
-          }
-          onColorChange={(color) =>
-            setControls((current) => ({ ...current, color }))
-          }
+          onColorChange={(color) => updateControl('color', color)}
+          onOpacityChange={(opacity) => updateControl('opacity', opacity)}
+          onSizeChange={(size) => updateControl('size', size)}
+          opacity={controls.opacity}
+          size={controls.size}
         />
       </div>
     </div>

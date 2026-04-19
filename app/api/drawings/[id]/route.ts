@@ -1,34 +1,40 @@
-import { NextResponse } from 'next/server';
+import { unauthenticated } from '@/lib/auth/responses';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 import {
+  isDrawingNotFoundError,
+  isNotOwnerError,
   requireOwnedDrawing,
-  DrawingNotFoundError,
-  NotOwnerError,
 } from '@/lib/drawing/authorization';
 import {
-  updateDrawing,
   deleteDrawing,
-  StaleWriteError,
+  isStaleWriteError,
+  updateDrawing,
 } from '@/lib/drawing/storage';
-import type { Stroke } from '@/lib/drawing/types';
+import type { Stroke } from '@/types/drawing';
+import { NextResponse } from 'next/server';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
 const mapAuthError = (error: unknown) => {
-  if (error instanceof DrawingNotFoundError)
+  if (isDrawingNotFoundError(error)) {
     return NextResponse.json({ error: 'not found' }, { status: 404 });
-  if (error instanceof NotOwnerError)
+  }
+
+  if (isNotOwnerError(error)) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   throw error;
 };
 
-export const GET = async (_request: Request, routeContext: RouteContext) => {
+export const GET = async (_request: Request, { params }: RouteContext) => {
   const session = await getSessionFromCookie();
-  if (!session)
-    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
-  const { id } = await routeContext.params;
+  if (!session) return unauthenticated();
+
+  const { id } = await params;
+
   try {
     const drawing = await requireOwnedDrawing(id, session);
     return NextResponse.json({ drawing });
@@ -38,27 +44,25 @@ export const GET = async (_request: Request, routeContext: RouteContext) => {
 };
 
 interface PatchBody {
-  title?: string;
+  expectedUpdatedAt?: number;
   strokes?: Stroke[];
   thumbnailPngBase64?: string;
-  expectedUpdatedAt?: number;
+  title?: string;
 }
 
-const decodeBase64Png = (encoded: string): Uint8Array => {
-  const binary = atob(encoded.replace(/^data:image\/png;base64,/, ''));
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index++)
-    bytes[index] = binary.charCodeAt(index);
-  return bytes;
-};
+const decodeBase64Png = (encoded: string) =>
+  new Uint8Array(
+    Buffer.from(encoded.replace(/^data:image\/png;base64,/, ''), 'base64'),
+  );
 
-export const PATCH = async (request: Request, routeContext: RouteContext) => {
+export const PATCH = async (request: Request, { params }: RouteContext) => {
   const session = await getSessionFromCookie();
-  if (!session)
-    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
-  const { id } = await routeContext.params;
+  if (!session) return unauthenticated();
+
+  const { id } = await params;
 
   let body: PatchBody;
+
   try {
     body = (await request.json()) as PatchBody;
   } catch {
@@ -67,11 +71,6 @@ export const PATCH = async (request: Request, routeContext: RouteContext) => {
 
   try {
     await requireOwnedDrawing(id, session);
-  } catch (error) {
-    return mapAuthError(error);
-  }
-
-  try {
     const drawing = await updateDrawing(id, {
       title: body.title,
       strokes: body.strokes,
@@ -83,22 +82,26 @@ export const PATCH = async (request: Request, routeContext: RouteContext) => {
     });
     return NextResponse.json({ drawing });
   } catch (error) {
-    if (error instanceof StaleWriteError)
+    if (isStaleWriteError(error)) {
       return NextResponse.json({ error: 'stale write' }, { status: 409 });
-    throw error;
+    }
+
+    return mapAuthError(error);
   }
 };
 
-export const DELETE = async (_request: Request, routeContext: RouteContext) => {
+export const DELETE = async (_request: Request, { params }: RouteContext) => {
   const session = await getSessionFromCookie();
-  if (!session)
-    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
-  const { id } = await routeContext.params;
+  if (!session) return unauthenticated();
+
+  const { id } = await params;
+
   try {
     await requireOwnedDrawing(id, session);
   } catch (error) {
     return mapAuthError(error);
   }
+
   await deleteDrawing(id);
   return new Response(null, { status: 204 });
 };

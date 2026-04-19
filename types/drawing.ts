@@ -23,3 +23,5 @@ export interface DrawingMeta {
 export interface Drawing extends DrawingMeta {
   strokes: Stroke[];
 }
+
+export type SaveState = 'error' | 'idle' | 'saved' | 'saving';

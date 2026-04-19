@@ -1,12 +1,14 @@
-import { redirect } from 'next/navigation';
+import { GalleryTile } from '@/components/draw/GalleryTile';
+import { NewDrawingButton } from '@/components/draw/NewDrawingButton';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 import { listDrawings } from '@/lib/drawing/storage';
-import { NewDrawingButton } from '@/components/draw/NewDrawingButton';
-import { GalleryTile } from '@/components/draw/GalleryTile';
+import { redirect } from 'next/navigation';
 
-export default async function DrawGalleryPage() {
+const DrawGalleryPage = async () => {
   const session = await getSessionFromCookie();
-  if (!session) redirect('/login');
+  if (!session) {
+    redirect('/login');
+  }
 
   const drawings = await listDrawings(session.userId);
 
@@ -26,4 +28,6 @@ export default async function DrawGalleryPage() {
       )}
     </main>
   );
-}
+};
+
+export default DrawGalleryPage;
