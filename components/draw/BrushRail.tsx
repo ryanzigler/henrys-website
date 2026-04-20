@@ -2,9 +2,21 @@
 
 import { cx } from '@/cva.config';
 import { BRUSH_LIST } from '@/lib/drawing/brushes';
+import { Switch } from '@/components/ui/Switch';
 import type { Brush } from '@/types/drawing';
-import { Button } from '@base-ui/react';
+import { Button as BaseButton } from '@base-ui/react';
 import { useEffect, useRef } from 'react';
+
+/**
+ * BrushRail — floating brush + paper chooser above the canvas.
+ *
+ * FIX 2: "Show grid" now uses the shared <Switch> (Base UI Switch) instead
+ * of the hand-rolled role="switch" span with its own keyboard handler.
+ *
+ * The brush tiles and paper swatches stay bespoke — they're domain-specific
+ * enough that promoting them to primitives would be premature. They already
+ * share consistent hover treatments via Tailwind utilities.
+ */
 
 export interface PaperPreset {
   id: string;
@@ -88,11 +100,11 @@ export const BrushRail = ({
 
   return (
     <div className="pointer-events-none absolute top-7 left-1/2 flex -translate-x-1/2 items-start gap-2.5">
-      <div className="shadow-paper-pill pointer-events-auto flex gap-0.5 rounded-2xl border border-hair bg-white p-1.5">
+      <div className="pointer-events-auto flex gap-0.5 rounded-2xl border border-hair bg-white p-1.5 shadow-paper-pill">
         {BRUSH_LIST.map((brush) => {
           const active = value === brush;
           return (
-            <Button
+            <BaseButton
               aria-pressed={active}
               className={cx(
                 'flex w-16.5 flex-col items-center gap-0.75 rounded-xl border-none bg-transparent px-1.5 pt-2 pb-1.75 text-ink transition-colors duration-150 hover:not-aria-pressed:bg-ink/6',
@@ -113,16 +125,16 @@ export const BrushRail = ({
               >
                 {BRUSH_LABEL[brush]}
               </span>
-            </Button>
+            </BaseButton>
           );
         })}
       </div>
 
       <div
         ref={paperPillRef}
-        className="shadow-paper-pill pointer-events-auto relative flex gap-0.5 rounded-2xl border border-hair bg-white p-1.5"
+        className="pointer-events-auto relative flex gap-0.5 rounded-2xl border border-hair bg-white p-1.5 shadow-paper-pill"
       >
-        <Button
+        <BaseButton
           aria-expanded={paperOpen}
           className={cx(
             'flex w-16.5 flex-col items-center gap-0.75 rounded-2xl border-none bg-transparent px-1.5 pt-2 transition-colors duration-150 hover:not-aria-expanded:bg-ink/6 hover:not-aria-pressed:bg-ink/6',
@@ -140,9 +152,7 @@ export const BrushRail = ({
                 && 'bg-radial from-black/35 from-[1px] to-transparent to-[1.2px]',
               showGrid && paperOpen && 'from-white',
             )}
-            style={{
-              backgroundColor: paperColor,
-            }}
+            style={{ backgroundColor: paperColor }}
           />
           <span
             className={cx(
@@ -152,13 +162,13 @@ export const BrushRail = ({
           >
             Paper
           </span>
-        </Button>
+        </BaseButton>
 
         {paperOpen && (
           <div
             role="dialog"
             aria-label="Paper"
-            className="shadow-paper-dialog absolute top-[calc(100%+0.625rem)] right-0 z-20 w-60 rounded-2xl border border-hair bg-white p-3.5"
+            className="absolute top-[calc(100%+0.625rem)] right-0 z-20 w-60 rounded-2xl border border-hair bg-white p-3.5 shadow-paper-dialog"
           >
             <div className="mb-2.5 text-xs font-bold tracking-[1.4px] text-muted uppercase">
               Paper color
@@ -166,11 +176,10 @@ export const BrushRail = ({
             <div className="grid grid-cols-6 gap-1.5">
               {PAPER_COLORS.map((preset) => {
                 const active = paperColor === preset.value;
-
                 return (
-                  <Button
+                  <BaseButton
                     className={cx(
-                      'hover:shadow-swatch aspect-square rounded-md p-0 outline-offset-2 transition-all hover:scale-112',
+                      'aspect-square rounded-md p-0 outline-offset-2 transition-all hover:scale-112 hover:shadow-swatch',
                       preset.value,
                       preset.value === 'bg-white' && 'border border-hair',
                       active && 'outline-2 outline-ink',
@@ -184,28 +193,11 @@ export const BrushRail = ({
             </div>
             <label className="mt-3.5 flex cursor-pointer items-center justify-between gap-2.5 text-sm font-medium text-ink">
               Show grid
-              <span
-                role="switch"
-                aria-checked={showGrid}
-                tabIndex={0}
-                onClick={() => onShowGridChange(!showGrid)}
-                onKeyDown={(event) => {
-                  if (event.key === ' ' || event.key === 'Enter') {
-                    event.preventDefault();
-                    onShowGridChange(!showGrid);
-                  }
-                }}
-                className={cx(
-                  'relative inline-block h-5 w-8.5 shrink-0 rounded-full transition-all duration-150 hover:brightness-110',
-                  showGrid && 'bg-ink',
-                  !showGrid && 'bg-hair',
-                )}
-              >
-                <span
-                  className="absolute top-0.5 size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-[left]"
-                  style={{ left: showGrid ? 16 : 2 }}
-                />
-              </span>
+              <Switch
+                checked={showGrid}
+                onCheckedChange={onShowGridChange}
+                aria-label="Show grid"
+              />
             </label>
           </div>
         )}

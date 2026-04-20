@@ -330,7 +330,7 @@ export const Canvas = ({
         <div
           aria-hidden
           className={cx(
-            'from-grid-light pointer-events-none absolute inset-0 bg-radial from-[1.2px] to-transparent to-[1.4px] bg-size-[18px_18px]',
+            'pointer-events-none absolute inset-0 bg-radial from-grid-light from-[1.2px] to-transparent to-[1.4px] bg-size-[18px_18px]',
             isDarkPaper && 'from-black/8',
           )}
         />
@@ -350,9 +350,9 @@ export const Canvas = ({
         <div
           aria-hidden
           className={cx(
-            'shadow-brush-cursor-light pointer-events-none absolute -translate-1/2 rounded-full border-[1.5px] border-ink/55',
+            'pointer-events-none absolute -translate-1/2 rounded-full border-[1.5px] border-ink/55 shadow-brush-cursor-light',
             {
-              'shadow-brush-cursor-dark border-white/75 bg-white': isDarkPaper,
+              'border-white/75 bg-white shadow-brush-cursor-dark': isDarkPaper,
             },
           )}
           style={{

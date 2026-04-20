@@ -13,6 +13,7 @@
   --color-accent: oklch(0.6811 0.15451 31.462);
   --color-accent-soft: oklch(0.9582 0.01506 37.547);
   --color-danger: oklch(0.5391 0.158 32.28);
+  --color-danger-soft: oklch(0.9582 0.01506 37.547);
   --color-paper-blush: oklch(0.9552 0.0179 48.53);
   --color-paper-mint: oklch(0.9524 0.0157 139.44);
   --color-paper-sky: oklch(0.9463 0.0103 247.94);
@@ -20,8 +21,13 @@
   --color-salmon: oklch(0.6811 0.1545 31.48);
   --color-cheeto-dust: oklch(0.8043 0.1318 73.35);
 
-  --color-grid-light: oklch(0.4895 0.0685 72.99 / 7%) --shadow-gallery: 0 10px
-    30px oklch(0.296 0.04381 64.71 / 14%);
+  /* FIX 1: These were being collapsed onto one line by a missing semicolon. */
+  --color-grid-light: oklch(0.4895 0.0685 72.99 / 7%);
+  --color-new-drawing: oklch(0.3215 0.0117 84.58);
+  --shadow-gallery: 0 10px 30px oklch(0.296 0.04381 64.71 / 14%);
+  --shadow-button-hover: 0 6px 18px oklch(0.2615 0.0117 84.58 / 28%);
+  --shadow-button-active: 0 2px 6px oklch(0.2615 0.0117 84.58 / 20%);
+  --shadow-menu: 0 10px 30px oklch(0.296 0.04381 64.71 / 14%);
   --shadow-canvas:
     0 1px 0 oklch(0 0 0 / 4%),
     0 30px 60px -20px oklch(0.296 0.0438 64.71 / 18%),
@@ -31,6 +37,20 @@
   --shadow-paper-pill: 0 4px 20px oklch(0.296 0.0438 64.71 / 8%);
   --shadow-paper-dialog: 0 10px 30px oklch(0.296 0.0438 64.71 / 14%);
   --shadow-swatch: 0 2px 8px oklch(0.296 0.0438 64.71 / 18%);
+
+  /* FIX 4: Display type scale — tokens for our three display sizes */
+  --text-display-sm: 21px;
+  --text-display-sm--line-height: 1.15;
+  --text-display-sm--letter-spacing: -0.2px;
+  --text-display-sm--font-weight: 500;
+  --text-display-md: 27px;
+  --text-display-md--line-height: 1.15;
+  --text-display-md--letter-spacing: -0.3px;
+  --text-display-md--font-weight: 500;
+  --text-display-lg: 44px;
+  --text-display-lg--line-height: 1.05;
+  --text-display-lg--letter-spacing: -0.8px;
+  --text-display-lg--font-weight: 500;
 }
 
 @theme inline {
@@ -48,117 +68,17 @@ body {
   isolation: isolate;
 }
 
-/* Paper Studio hover system — shared across editor components */
-.ps-ghost-btn {
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-.ps-ghost-btn:hover {
-  background: #faf6ec;
-  border-color: #27241e;
-}
-
-.ps-primary-btn {
-  transition:
-    background 0.15s,
-    transform 0.15s,
-    box-shadow 0.15s;
-}
-.ps-primary-btn:hover {
-  background: #3d3830;
-  box-shadow: 0 6px 18px rgba(39, 36, 30, 0.28);
-  transform: translateY(-1px);
-}
-.ps-primary-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(39, 36, 30, 0.2);
-}
-
-.ps-link-btn {
-  transition: color 0.15s;
-}
-.ps-link-btn:hover {
-  color: #27241e;
-}
-
-.ps-avatar {
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
-  cursor: pointer;
-}
-.ps-avatar:hover {
-  transform: scale(1.06);
-  box-shadow: 0 4px 14px rgba(232, 111, 90, 0.4);
-}
-
-.ps-option-btn {
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-.ps-option-btn:not(.is-active):hover {
-  border-color: #27241e;
-  background: #faf6ec;
-}
-
-.ps-zoom-pill {
-  transition: background 0.15s;
-}
-.ps-danger-btn {
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-.ps-danger-btn:hover {
-  background: #fbeeea;
-  border-color: #e86f5a;
-  color: #b8412c;
-}
-
-.ps-card {
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  cursor: pointer;
-}
-.ps-card:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 18px 40px -18px rgba(60, 40, 20, 0.25),
-    0 6px 12px -6px rgba(60, 40, 20, 0.1);
-}
-.ps-card:hover .ps-card-thumb {
-  transform: scale(1.02);
-}
-.ps-card-thumb {
-  transition: transform 0.3s;
-}
-
-.ps-new-card {
-  transition:
-    background 0.2s,
-    border-color 0.2s,
-    transform 0.2s;
-  cursor: pointer;
-}
-.ps-new-card:hover {
-  background: #faf6ec;
-  border-color: #27241e;
-  transform: translateY(-3px);
-}
-
-.ps-menu-item {
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.ps-menu-item:hover {
-  background: #faf6ec;
-}
-.ps-menu-item-danger:hover {
-  background: oklch(95.824% 0.01506 37.547);
-}
+/*
+ * FIX 3: Paper Studio hover system has been deleted from globals.
+ * All of these states are now expressed inline with Tailwind utilities in
+ * the ui/ primitives (Button, IconButton, Avatar, MenuItem, etc.). This
+ * removes the parallel styling system and lets the primitives own their
+ * interaction states.
+ *
+ * Previously this file contained: .ps-ghost-btn, .ps-primary-btn,
+ * .ps-link-btn, .ps-avatar, .ps-option-btn, .ps-zoom-pill, .ps-danger-btn,
+ * .ps-card, .ps-new-card, .ps-menu-item, .ps-menu-item-danger, .ps-swatch.
+ *
+ * Keep this file intentionally empty below @theme — Tailwind is the styling
+ * system; hover states belong on the components.
+ */

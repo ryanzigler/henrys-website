@@ -1,9 +1,25 @@
 'use client';
 
+import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { cx } from '@/cva.config';
 import type { Brush } from '@/types/drawing';
-import { Button } from '@base-ui/react';
-import type { ReactNode } from 'react';
+import { Button as BaseButton } from '@base-ui/react';
+import { useState, type ReactNode } from 'react';
+
+/**
+ * StrokeControls — right-hand panel in the drawing editor.
+ *
+ * FIX 2: the palette swatches and size presets were bare <Button> elements
+ * with inline styles. They still are (the dynamic color / size thumb
+ * genuinely needs inline style) — but the "Clear canvas" button at the
+ * bottom is now our shared <Button variant="danger">.
+ *
+ * FIX 7: the "Clear the whole drawing?" window.confirm becomes a
+ * ConfirmDialog.
+ *
+ * FIX 4: "Tool" heading now uses text-display-md.
+ */
 
 const PALETTE = [
   '#27241E',
@@ -20,6 +36,9 @@ const PALETTE = [
 ];
 
 const SIZE_PRESETS = [3, 6, 12, 20, 30];
+
+const SWATCH_CLASS =
+  'aspect-square rounded-full p-0 transition-[transform,box-shadow] duration-150 hover:scale-110 hover:shadow-swatch';
 
 const TOOL_HINTS: Record<Brush, string> = {
   pen: 'Crisp, inky lines.',
@@ -65,17 +84,16 @@ export const StrokeControls = ({
   size,
   tool,
 }: StrokeControlsProps) => {
+  const [clearOpen, setClearOpen] = useState(false);
   const isEraser = tool === 'eraser';
   const previewDiameter = Math.min(28, Math.max(4, size * 0.8));
 
   return (
-    <aside className="flex h-full flex-col gap-[26px] overflow-auto border-l border-hair bg-ivory px-6 py-7">
+    <aside className="flex h-full flex-col gap-6.5 overflow-auto border-l border-hair bg-ivory px-6 py-7">
       <Section label="Tool">
         <div className="flex items-baseline justify-between gap-2.5">
-          <div className="font-display text-[27px] font-medium tracking-[-0.3px] capitalize">
-            {tool}
-          </div>
-          <div className="max-w-[150px] text-right text-xs leading-[1.3] text-muted">
+          <div className="font-display text-display-md capitalize">{tool}</div>
+          <div className="max-w-37.5 text-right text-xs leading-[1.3] text-muted">
             {TOOL_HINTS[tool]}
           </div>
         </div>
@@ -104,10 +122,10 @@ export const StrokeControls = ({
             {PALETTE.map((presetColor) => {
               const active = color === presetColor;
               return (
-                <Button
+                <BaseButton
                   key={presetColor}
                   aria-label={presetColor}
-                  className="ps-swatch aspect-square rounded-full p-0"
+                  className={SWATCH_CLASS}
                   onClick={() => onColorChange(presetColor)}
                   style={{
                     background: presetColor,
@@ -165,13 +183,14 @@ export const StrokeControls = ({
           {SIZE_PRESETS.map((preset) => {
             const active = size === preset;
             return (
-              <Button
+              <BaseButton
                 key={preset}
                 aria-label={`${preset}px`}
                 data-active={active}
                 onClick={() => onSizeChange(preset)}
                 className={cx(
-                  'grid h-8.5 flex-1 place-items-center rounded-lg border border-hair bg-white transition-colors duration-150 hover:not-data-[active=true]:border-ink hover:not-data-[active=true]:bg-background-draw',
+                  'grid h-8.5 flex-1 place-items-center rounded-lg border border-hair bg-white transition-colors duration-150',
+                  'hover:not-data-[active=true]:border-ink hover:not-data-[active=true]:bg-background-draw',
                   active && 'border-ink bg-ink',
                 )}
               >
@@ -190,7 +209,7 @@ export const StrokeControls = ({
                       : 'none',
                   }}
                 />
-              </Button>
+              </BaseButton>
             );
           })}
         </div>
@@ -200,11 +219,11 @@ export const StrokeControls = ({
         <Section label="Recent">
           <div className="flex gap-2">
             {recentColors.map((recent) => (
-              <Button
+              <BaseButton
                 key={recent}
                 aria-label={recent}
                 onClick={() => onColorChange(recent)}
-                className="ps-swatch h-7 w-7 rounded-full border-none p-0"
+                className={cx(SWATCH_CLASS, 'size-7 border-none')}
                 style={{
                   background: recent,
                   border: recent === '#FFFFFF' ? '1px solid #E5DECE' : 'none',
@@ -216,12 +235,7 @@ export const StrokeControls = ({
       )}
 
       <div className="flex-1" />
-      <Button
-        className="ps-danger-btn inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-hair bg-white text-[13px] font-medium text-ink"
-        onClick={() => {
-          if (confirm('Clear the whole drawing?')) onClear();
-        }}
-      >
+      <Button variant="danger" size="lg" onClick={() => setClearOpen(true)}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
           <path
             d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"
@@ -233,6 +247,16 @@ export const StrokeControls = ({
         </svg>
         Clear canvas
       </Button>
+
+      <ConfirmDialog
+        open={clearOpen}
+        onOpenChange={setClearOpen}
+        title="Clear the whole drawing?"
+        description="All strokes will be removed. You can't undo this from the toolbar."
+        confirmLabel="Clear canvas"
+        destructive
+        onConfirm={onClear}
+      />
     </aside>
   );
 };

@@ -1,8 +1,10 @@
+import { UserMenu } from '@/components/auth/UserMenu';
 import { GalleryTile } from '@/components/draw/GalleryTile';
 import {
   NewDrawingButton,
   NewDrawingCard,
 } from '@/components/draw/NewDrawingButton';
+import { initialsOf } from '@/lib/auth/identity';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 import { listDrawings } from '@/lib/drawing/storage';
 import { redirect } from 'next/navigation';
@@ -21,12 +23,6 @@ const formatLastEdited = (updatedAt: number) => {
   return `${Math.floor(days / 30)} months ago`;
 };
 
-const initialsOf = (name: string) => {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-};
-
 const DrawGalleryPage = async () => {
   const session = await getSessionFromCookie();
   if (!session) {
@@ -34,7 +30,6 @@ const DrawGalleryPage = async () => {
   }
 
   const drawings = await listDrawings(session.userId);
-  const initials = initialsOf(session.displayName);
   const count = drawings.length;
   const lastEdited =
     drawings[0] ?
@@ -44,19 +39,18 @@ const DrawGalleryPage = async () => {
   return (
     <main className="fixed inset-0 z-40 flex flex-col overflow-auto bg-ivory font-sans text-ink">
       <div className="flex h-16 shrink-0 items-center justify-end gap-5 border-b border-hair bg-ivory px-7">
-        <div
-          aria-hidden
-          className="hover:shadow-button-hover from-cheeto-dust to-salmon grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-linear-135 text-[13px] font-bold text-white transition-[transform,box-shadow] duration-150 hover:scale-106"
-        >
-          {initials}
-        </div>
+        <UserMenu
+          displayName={session.displayName}
+          initials={initialsOf(session.displayName)}
+          emoji={session.emoji}
+        />
       </div>
 
       <section className="flex-1 bg-canvas px-12 pt-10 pb-16">
         <div className="mx-auto max-w-300">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-6">
             <div className="min-w-0 flex-auto">
-              <h1 className="m-0 font-display text-[44px] leading-[1.05] font-medium tracking-[-0.8px] whitespace-nowrap">
+              <h1 className="m-0 font-display text-display-lg whitespace-nowrap">
                 {session.displayName}&rsquo;s drawings
               </h1>
               <div className="mt-2 text-sm text-muted">

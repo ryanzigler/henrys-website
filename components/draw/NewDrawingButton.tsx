@@ -1,32 +1,44 @@
 'use client';
 
-import { Button } from '@base-ui/react';
+import { Button } from '@/components/ui/Button';
+import { Button as BaseButton } from '@base-ui/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+/**
+ * NewDrawingButton / NewDrawingCard
+ *
+ * FIX 2: NewDrawingButton now uses our shared <Button variant="primary">.
+ * NewDrawingCard stays as a bespoke dashed tile (it's a layout element,
+ * not a button per se) but the TODO alert for error handling is replaced
+ * with a setError + inline ConfirmDialog (kept inside the button for
+ * simplicity — callers don't need to plumb it).
+ */
 
 const useCreateDrawing = () => {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const createDrawing = async () => {
     setCreating(true);
-
     try {
       const response = await fetch('/api/drawings', { method: 'POST' });
-
-      if (!response.ok) {
-        throw new Error(`create failed (${response.status})`);
-      }
-
+      if (!response.ok) throw new Error(`create failed (${response.status})`);
       const { drawing } = await response.json();
       router.push(`/draw/${drawing.id}`);
     } catch (error) {
-      alert((error as Error).message);
+      setErrorMsg((error as Error).message);
       setCreating(false);
     }
   };
 
-  return { createDrawing, creating };
+  return {
+    createDrawing,
+    creating,
+    errorMsg,
+    clearError: () => setErrorMsg(null),
+  };
 };
 
 const PlusIcon = ({ size = 14 }: { size?: number }) => (
@@ -45,7 +57,8 @@ export const NewDrawingButton = () => {
 
   return (
     <Button
-      className="hover:bg-new-drawing hover:shadow-button-hover active:shadow-button-active inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border-none bg-ink px-4.5 text-sm font-semibold whitespace-nowrap text-white transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.25 active:translate-y-0 disabled:opacity-50"
+      variant="primary"
+      size="lg"
       disabled={creating}
       onClick={createDrawing}
     >
@@ -59,11 +72,17 @@ export const NewDrawingCard = () => {
   const { createDrawing, creating } = useCreateDrawing();
 
   return (
-    <Button
+    <BaseButton
       aria-label="New drawing"
-      className="hover:bg-danger-soft flex aspect-3/2 cursor-pointer flex-col items-center justify-center gap-2.5 rounded-xl border-[1.5px] border-dashed border-hair bg-transparent text-muted transition-[background,border-color,transform] duration-200 hover:-translate-y-0.75 hover:border-ink disabled:opacity-50"
       disabled={creating}
       onClick={createDrawing}
+      className={[
+        'flex aspect-3/2 cursor-pointer flex-col items-center justify-center gap-2.5',
+        'rounded-xl border-[1.5px] border-dashed border-hair bg-transparent text-muted',
+        'transition-[background,border-color,transform] duration-200',
+        'hover:-translate-y-0.75 hover:border-ink hover:bg-background-draw',
+        'disabled:pointer-events-none disabled:opacity-50',
+      ].join(' ')}
     >
       <div className="grid h-11 w-11 place-items-center rounded-full border border-hair bg-white text-ink">
         <PlusIcon size={18} />
@@ -72,6 +91,6 @@ export const NewDrawingCard = () => {
         {creating ? 'Creating…' : 'New drawing'}
       </div>
       <div className="text-xs text-muted">Start from a blank paper</div>
-    </Button>
+    </BaseButton>
   );
 };

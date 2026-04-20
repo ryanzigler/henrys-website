@@ -1,9 +1,20 @@
 'use client';
 
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import type { SaveState } from '@/types/drawing';
-import { Button } from '@base-ui/react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+
+/**
+ * Toolbar — top bar of the drawing editor.
+ *
+ * FIX 2: Share/Save buttons now use <Button>, undo/redo use <IconButton>.
+ * FIX 4: title uses text-display-sm instead of inline [21px] / leading / ts.
+ *
+ * The nested overflow-hidden wrapper around undo+redo is kept so they read
+ * as a segmented control.
+ */
 
 interface ToolbarProps {
   onRedo: () => void;
@@ -24,6 +35,44 @@ const SAVE_STATE_LABEL: Record<SaveState, string> = {
 
 const formatDate = () =>
   new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+const UndoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M9 14L4 9l5-5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M4 9h10a6 6 0 0 1 6 6v1a4 4 0 0 1-4 4h-3"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const RedoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M15 14l5-5-5-5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M20 9H10a6 6 0 0 0-6 6v1a4 4 0 0 0 4 4h3"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export const Toolbar = ({
   onRedo,
@@ -62,7 +111,7 @@ export const Toolbar = ({
         {editing ?
           <input
             aria-label="title"
-            className="w-56 border-b border-hair bg-transparent font-display text-[21px] font-medium tracking-[-0.2px] text-ink outline-none"
+            className="w-56 border-b border-hair bg-transparent font-display text-display-sm text-ink outline-none"
             onBlur={commit}
             onChange={(event) => onTitleChange(event.target.value)}
             onKeyDown={(event) => {
@@ -76,7 +125,7 @@ export const Toolbar = ({
             value={title}
           />
         : <button
-            className="cursor-text text-left font-display text-[21px] font-medium tracking-[-0.2px] text-ink transition-colors duration-150 hover:text-ink"
+            className="cursor-text text-left font-display text-display-sm text-ink transition-colors duration-150 hover:text-ink"
             onClick={() => setEditing(true)}
             title="Rename"
           >
@@ -88,64 +137,33 @@ export const Toolbar = ({
         </div>
       </div>
       <div className="flex-1" />
+
       <div className="flex overflow-hidden rounded-[10px] border border-hair bg-white">
-        <Button
-          className="grid h-8.5 w-9 place-items-center border-none bg-transparent text-ink transition-colors duration-150 hover:bg-ivory"
+        <IconButton
+          size="lg"
+          tone="default"
           onClick={onUndo}
           title="Undo"
+          className="rounded-none"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 14L4 9l5-5"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M4 9h10a6 6 0 0 1 6 6v1a4 4 0 0 1-4 4h-3"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Button>
+          <UndoIcon />
+        </IconButton>
         <div className="w-px bg-hair" />
-        <Button
-          className="grid h-8.5 w-9 place-items-center border-none bg-transparent text-ink transition-colors duration-150 hover:bg-ivory"
+        <IconButton
+          size="lg"
+          tone="default"
           onClick={onRedo}
           title="Redo"
+          className="rounded-none"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 14l5-5-5-5"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M20 9H10a6 6 0 0 0-6 6v1a4 4 0 0 0 4 4h3"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Button>
+          <RedoIcon />
+        </IconButton>
       </div>
-      <Button
-        className="hover:bg-danger-soft h-9 rounded-lg border border-hair bg-white px-4 text-sm text-ink transition-colors hover:border-ink"
-        disabled
-        title="Share (coming soon)"
-      >
+
+      <Button variant="ghost" disabled title="Share (coming soon)">
         Share
       </Button>
-      <Button
-        className="hover:bg-new-drawing hover:shadow-button-hover active:shadow-button-active h-9 cursor-pointer rounded-lg border-none bg-ink px-4.5 text-sm font-semibold text-white transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.25 active:translate-y-0"
-        onClick={onSaveToPhotos}
-      >
+      <Button variant="primary" onClick={onSaveToPhotos}>
         Save
       </Button>
     </div>

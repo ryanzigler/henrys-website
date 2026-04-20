@@ -1,8 +1,23 @@
 'use client';
 
-import { Button } from '@base-ui/react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { IconButton } from '@/components/ui/IconButton';
+import { Menu } from '@/components/ui/Menu';
+import { PromptDialog } from '@/components/ui/PromptDialog';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+
+/**
+ * GalleryActions — the "⋯" menu on gallery tiles.
+ *
+ * FIX 7: replaces window.confirm / window.prompt with styled modals.
+ * FIX 2: replaces the hand-rolled dropdown with Base UI Menu.
+ *
+ * Error states from the API used to surface as window.alert — now they
+ * come back as a toast-less setError that shows in a tiny inline dialog.
+ * (If you want a proper toast system later, the dialog below is trivial
+ * to swap.)
+ */
 
 interface GalleryActionsProps {
   id: string;
@@ -48,110 +63,93 @@ const DeleteIcon = () => (
 
 export const GalleryActions = ({ id, title }: GalleryActionsProps) => {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (event: MouseEvent) => {
-      if (
-        wrapperRef.current
-        && !wrapperRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
-
-  const renameDrawing = async () => {
-    setOpen(false);
-
-    const nextTitle = prompt('New title:', title);
-    if (nextTitle === null || nextTitle.trim() === '' || nextTitle === title) {
-      return;
-    }
-
+  const renameDrawing = async (nextTitle: string) => {
+    if (nextTitle === title) return;
     const response = await fetch(`/api/drawings/${id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ title: nextTitle }),
     });
-
     if (!response.ok) {
-      alert('rename failed');
+      setErrorMsg('Rename failed. Try again.');
       return;
     }
     router.refresh();
   };
 
   const deleteDrawing = async () => {
-    setOpen(false);
-
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) {
-      return;
-    }
-
     const response = await fetch(`/api/drawings/${id}`, { method: 'DELETE' });
-
     if (!response.ok) {
-      alert('delete failed');
+      setErrorMsg('Delete failed. Try again.');
       return;
     }
-
     router.refresh();
   };
 
-  const toggle = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setOpen((prev) => !prev);
+  // Prevent the menu trigger from activating the parent <Link> on the tile.
+  const stop = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
-    <div className="relative shrink-0" ref={wrapperRef}>
-      <Button
-        aria-haspopup="menu"
-        aria-label="More actions"
-        className="grid size-7.5 place-items-center rounded-lg border-none bg-transparent text-muted transition-colors duration-150 hover:bg-ivory"
-        onClick={toggle}
-      >
-        <DotsIcon />
-      </Button>
-
-      {open && (
-        <div
-          className="shadow-gallery absolute top-full right-0 z-20 mt-1 w-40 rounded-lg border border-hair bg-white p-1.5"
-          role="menu"
-        >
-          <button
-            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md border-none bg-transparent px-2.5 py-2 text-left font-sans text-sm text-ink transition-colors duration-150 hover:bg-background-draw"
-            onClick={(event) => {
-              event.preventDefault();
-              renameDrawing();
-            }}
-            role="menuitem"
-            type="button"
-          >
-            <RenameIcon />
+    <div onClick={stop} onMouseDown={stop}>
+      <Menu.Root>
+        <Menu.Trigger
+          render={
+            <IconButton size="md" tone="muted" aria-label="More actions">
+              <DotsIcon />
+            </IconButton>
+          }
+        />
+        <Menu.Popup>
+          <Menu.Item icon={<RenameIcon />} onClick={() => setRenameOpen(true)}>
             Rename
-          </button>
-          <div className="mx-0.5 my-1 h-px bg-hair" />
-          <button
-            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md border-none bg-transparent px-2.5 py-2 text-left font-sans text-sm text-danger transition-colors hover:bg-accent-soft"
-            onClick={(event) => {
-              event.preventDefault();
-              deleteDrawing();
-            }}
-            role="menuitem"
-            type="button"
+          </Menu.Item>
+          <Menu.Separator />
+          <Menu.Item
+            tone="danger"
+            icon={<DeleteIcon />}
+            onClick={() => setDeleteOpen(true)}
           >
-            <DeleteIcon />
             Delete
-          </button>
-        </div>
-      )}
+          </Menu.Item>
+        </Menu.Popup>
+      </Menu.Root>
+
+      <PromptDialog
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+        title="Rename drawing"
+        label="Title"
+        defaultValue={title}
+        confirmLabel="Save"
+        onConfirm={renameDrawing}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={`Delete "${title}"?`}
+        description="This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={deleteDrawing}
+      />
+
+      <ConfirmDialog
+        open={errorMsg !== null}
+        onOpenChange={(next) => !next && setErrorMsg(null)}
+        title="Something went wrong"
+        description={errorMsg ?? ''}
+        confirmLabel="OK"
+        cancelLabel="Close"
+        onConfirm={() => setErrorMsg(null)}
+      />
     </div>
   );
 };
