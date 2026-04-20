@@ -6,6 +6,7 @@ interface Entry {
 export class FakeKV {
   private store = new Map<string, Entry>();
   private sets = new Map<string, Set<string>>();
+  private zsets = new Map<string, Map<string, number>>();
   private now = Date.now();
 
   advanceTime(ms: number) {
@@ -15,6 +16,7 @@ export class FakeKV {
   reset() {
     this.store.clear();
     this.sets.clear();
+    this.zsets.clear();
   }
 
   private clock() {
@@ -63,6 +65,7 @@ export class FakeKV {
     for (const key of keys) {
       if (this.store.delete(key)) deletedCount++;
       if (this.sets.delete(key)) deletedCount++;
+      if (this.zsets.delete(key)) deletedCount++;
     }
     return deletedCount;
   }
@@ -107,5 +110,40 @@ export class FakeKV {
   async smembers(key: string) {
     const set = this.sets.get(key);
     return set ? [...set] : [];
+  }
+
+  async zadd(key: string, entry: { member: string; score: number }) {
+    let zset = this.zsets.get(key);
+    if (!zset) {
+      zset = new Map();
+      this.zsets.set(key, zset);
+    }
+    const added = zset.has(entry.member) ? 0 : 1;
+    zset.set(entry.member, entry.score);
+    return added;
+  }
+
+  async zrem(key: string, ...members: string[]) {
+    const zset = this.zsets.get(key);
+    if (!zset) return 0;
+    let removed = 0;
+    for (const member of members) {
+      if (zset.delete(member)) removed++;
+    }
+    return removed;
+  }
+
+  async zrange(
+    key: string,
+    start: number,
+    stop: number,
+    opts?: { rev?: boolean },
+  ) {
+    const zset = this.zsets.get(key);
+    if (!zset) return [];
+    const sorted = [...zset.entries()].sort((a, b) => a[1] - b[1]);
+    if (opts?.rev) sorted.reverse();
+    const end = stop === -1 ? sorted.length : stop + 1;
+    return sorted.slice(start, end).map(([member]) => member);
   }
 }

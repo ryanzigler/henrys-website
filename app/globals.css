@@ -1,23 +1,164 @@
 @import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.2046 0 0);
+  --color-background-draw: oklch(0.9735 0.0139 88.68);
+  --color-ivory: oklch(0.9535 0.0131 82.4);
+  --color-paper: oklch(0.988 0.0082 91.48);
+  --color-ink: oklch(0.2615 0.0117 84.58);
+  --color-muted: oklch(0.6191 0.0253 84.58);
+  --color-hair: oklch(0.9018 0.0228 87.16);
+  --color-canvas: oklch(0.9198 0.0239 88.24);
+  --color-accent: oklch(0.6811 0.15451 31.462);
+  --color-accent-soft: oklch(0.9582 0.01506 37.547);
+  --color-danger: oklch(0.5391 0.158 32.28);
+  --color-paper-blush: oklch(0.9552 0.0179 48.53);
+  --color-paper-mint: oklch(0.9524 0.0157 139.44);
+  --color-paper-sky: oklch(0.9463 0.0103 247.94);
+  --color-paper-slate: oklch(0.2876 0.0073 297.37);
+  --color-salmon: oklch(0.6811 0.1545 31.48);
+  --color-cheeto-dust: oklch(0.8043 0.1318 73.35);
+
+  --color-grid-light: oklch(0.4895 0.0685 72.99 / 7%) --shadow-gallery: 0 10px
+    30px oklch(0.296 0.04381 64.71 / 14%);
+  --shadow-canvas:
+    0 1px 0 oklch(0 0 0 / 4%),
+    0 30px 60px -20px oklch(0.296 0.0438 64.71 / 18%),
+    0 10px 20px -10px oklch(0.296 0.0438 64.71 / 10%);
+  --shadow-brush-cursor-dark: 0 0 0 1px oklch(0 0 0 / 35%);
+  --shadow-brush-cursor-light: 0 0 0 1px oklch(1 0 0 / 70%);
+  --shadow-paper-pill: 0 4px 20px oklch(0.296 0.0438 64.71 / 8%);
+  --shadow-paper-dialog: 0 10px 30px oklch(0.296 0.0438 64.71 / 14%);
+  --shadow-swatch: 0 2px 8px oklch(0.296 0.0438 64.71 / 18%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
 
 .root {
   isolation: isolate;
+}
+
+/* Paper Studio hover system — shared across editor components */
+.ps-ghost-btn {
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.ps-ghost-btn:hover {
+  background: #faf6ec;
+  border-color: #27241e;
+}
+
+.ps-primary-btn {
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.ps-primary-btn:hover {
+  background: #3d3830;
+  box-shadow: 0 6px 18px rgba(39, 36, 30, 0.28);
+  transform: translateY(-1px);
+}
+.ps-primary-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(39, 36, 30, 0.2);
+}
+
+.ps-link-btn {
+  transition: color 0.15s;
+}
+.ps-link-btn:hover {
+  color: #27241e;
+}
+
+.ps-avatar {
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  cursor: pointer;
+}
+.ps-avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(232, 111, 90, 0.4);
+}
+
+.ps-option-btn {
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.ps-option-btn:not(.is-active):hover {
+  border-color: #27241e;
+  background: #faf6ec;
+}
+
+.ps-zoom-pill {
+  transition: background 0.15s;
+}
+.ps-danger-btn {
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.ps-danger-btn:hover {
+  background: #fbeeea;
+  border-color: #e86f5a;
+  color: #b8412c;
+}
+
+.ps-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  cursor: pointer;
+}
+.ps-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 40px -18px rgba(60, 40, 20, 0.25),
+    0 6px 12px -6px rgba(60, 40, 20, 0.1);
+}
+.ps-card:hover .ps-card-thumb {
+  transform: scale(1.02);
+}
+.ps-card-thumb {
+  transition: transform 0.3s;
+}
+
+.ps-new-card {
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+  cursor: pointer;
+}
+.ps-new-card:hover {
+  background: #faf6ec;
+  border-color: #27241e;
+  transform: translateY(-3px);
+}
+
+.ps-menu-item {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ps-menu-item:hover {
+  background: #faf6ec;
+}
+.ps-menu-item-danger:hover {
+  background: oklch(95.824% 0.01506 37.547);
 }

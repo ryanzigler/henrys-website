@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { startRegistration } from '@simplewebauthn/browser';
 import type { PublicUser } from '@/lib/auth/users';
+import { startRegistration } from '@simplewebauthn/browser';
+import { useEffect, useState } from 'react';
 
 const RegisterPage = () => {
   const [secret] = useState<string | null>(() => {
@@ -22,9 +22,14 @@ const RegisterPage = () => {
     const loadUsers = async () => {
       const res = await fetch('/api/users');
       const body = (await res.json()) as { users: PublicUser[] };
+
       setUsers(body.users);
-      if (body.users.length > 0) setSelectedUserId(body.users[0].id);
+
+      if (body.users.length > 0) {
+        setSelectedUserId(body.users[0].id);
+      }
     };
+
     loadUsers();
   }, []);
 
@@ -33,6 +38,7 @@ const RegisterPage = () => {
       setError('Missing ?secret=…');
       return;
     }
+
     setError(null);
     setStatus('requesting options…');
 
@@ -53,8 +59,10 @@ const RegisterPage = () => {
       const { error: msg } = await optsRes
         .json()
         .catch(() => ({ error: 'options failed' }));
+
       setError(msg ?? 'options failed');
       setStatus(null);
+
       return;
     }
     const { challengeId, options } = await optsRes.json();
@@ -70,12 +78,15 @@ const RegisterPage = () => {
           body: JSON.stringify({ challengeId, response }),
         },
       );
+
       if (!verifyRes.ok) {
         const { error: msg } = await verifyRes
           .json()
           .catch(() => ({ error: 'verify failed' }));
+
         throw new Error(msg ?? 'verify failed');
       }
+
       setStatus('registered! reload this page to add another.');
     } catch (err) {
       setError((err as Error).message);
@@ -95,17 +106,17 @@ const RegisterPage = () => {
       <fieldset className="mt-6 flex gap-4">
         <label>
           <input
-            type="radio"
             checked={mode === 'existing'}
             onChange={() => setMode('existing')}
+            type="radio"
           />{' '}
           Existing user (add device)
         </label>
         <label>
           <input
-            type="radio"
             checked={mode === 'new'}
             onChange={() => setMode('new')}
+            type="radio"
           />{' '}
           New user
         </label>
@@ -116,12 +127,12 @@ const RegisterPage = () => {
           User
           <select
             className="mt-1 block w-full rounded border p-2"
+            onChange={({ target }) => setSelectedUserId(target.value)}
             value={selectedUserId}
-            onChange={(e) => setSelectedUserId(e.target.value)}
           >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.emoji} {user.displayName}
+            {users.map(({ displayName, emoji, id }) => (
+              <option key={id} value={id}>
+                {emoji} {displayName}
               </option>
             ))}
           </select>
@@ -131,34 +142,34 @@ const RegisterPage = () => {
             Username (lowercase, unique)
             <input
               className="mt-1 block w-full rounded border p-2"
+              onChange={({ target }) => setUsername(target.value)}
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
             />
           </label>
           <label className="block">
             Display name
             <input
               className="mt-1 block w-full rounded border p-2"
+              onChange={({ target }) => setDisplayName(target.value)}
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
             />
           </label>
           <label className="block">
             Emoji
             <input
               className="mt-1 block w-full rounded border p-2"
+              onChange={({ target }) => setEmoji(target.value)}
               value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
             />
           </label>
         </div>
       }
 
       <button
-        type="button"
-        onClick={register}
-        disabled={!secret}
         className="mt-6 rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        disabled={!secret}
+        onClick={register}
+        type="button"
       >
         Register passkey
       </button>

@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createUser } from '@/lib/auth/users';
 import { GET } from '@/app/api/users/route';
+import { createUser } from '@/lib/auth/users';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { fakeKv } = await vi.hoisted(async () => {
   const { FakeKV } =
@@ -25,8 +25,10 @@ describe('GET /api/users', () => {
 
   it('returns all users with hasPasskey=false initially', async () => {
     await createUser({ username: 'henry', displayName: 'Henry', emoji: '🦖' });
+
     const res = await GET();
     const body = await res.json();
+
     expect(body.users).toHaveLength(1);
     expect(body.users[0]).toMatchObject({
       displayName: 'Henry',
