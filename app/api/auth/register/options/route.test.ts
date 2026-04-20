@@ -1,6 +1,7 @@
 import { POST } from '@/app/api/auth/register/options/route';
 import { saveCredential } from '@/lib/auth/credentials';
 import { createUser } from '@/lib/auth/users';
+import { env } from '@/lib/env';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { fakeKv } = await vi.hoisted(async () => {
@@ -11,7 +12,7 @@ const { fakeKv } = await vi.hoisted(async () => {
 
 vi.mock('@/lib/kv', () => ({ kv: fakeKv }));
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'test-admin-secret';
+const ADMIN_SECRET = env.ADMIN_SECRET;
 
 const adminRequest = (body: unknown) =>
   new Request(`http://t/api/auth/register/options?secret=${ADMIN_SECRET}`, {

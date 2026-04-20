@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
+import { env } from '@/lib/env';
 import { kv } from '@/lib/kv';
 import { randomToken } from '@/lib/random';
 
@@ -14,14 +15,8 @@ export interface SessionRecord {
 
 const sessionKey = (id: string) => `session:${id}`;
 
-const getSecret = () => {
-  const secret = process.env.AUTH_COOKIE_SECRET;
-  if (!secret) throw new Error('AUTH_COOKIE_SECRET is not set');
-  return secret;
-};
-
 const sign = (value: string) =>
-  createHmac('sha256', getSecret()).update(value).digest('base64url');
+  createHmac('sha256', env.AUTH_COOKIE_SECRET).update(value).digest('base64url');
 
 const signedCookieValue = (sessionId: string) =>
   `${sessionId}.${sign(sessionId)}`;

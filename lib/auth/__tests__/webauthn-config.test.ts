@@ -1,28 +1,13 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { getWebAuthnConfig } from '@/lib/auth/webauthn-config';
+import { env } from '@/lib/env';
 
 describe('webauthn-config', () => {
-  const originalEnv = { ...process.env };
-
-  afterEach(() => {
-    process.env = { ...originalEnv };
-  });
-
-  it('returns config read from environment variables', () => {
-    process.env.WEBAUTHN_RP_ID = 'henrys.example.com';
-    process.env.WEBAUTHN_ORIGIN = 'https://henrys.example.com';
-    process.env.WEBAUTHN_RP_NAME = "Henry's Site";
+  it('returns config read from the validated env', () => {
     expect(getWebAuthnConfig()).toEqual({
-      rpID: 'henrys.example.com',
-      origin: 'https://henrys.example.com',
-      rpName: "Henry's Site",
+      rpID: env.WEBAUTHN_RP_ID,
+      origin: env.WEBAUTHN_ORIGIN,
+      rpName: env.WEBAUTHN_RP_NAME,
     });
-  });
-
-  it('throws when required vars are missing', () => {
-    delete process.env.WEBAUTHN_RP_ID;
-    delete process.env.WEBAUTHN_ORIGIN;
-    delete process.env.WEBAUTHN_RP_NAME;
-    expect(() => getWebAuthnConfig()).toThrow(/WEBAUTHN_RP_ID/);
   });
 });

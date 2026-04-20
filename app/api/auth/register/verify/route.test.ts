@@ -1,6 +1,7 @@
 import { POST } from '@/app/api/auth/register/verify/route';
 import { saveChallenge } from '@/lib/auth/challenges';
 import { getCredential } from '@/lib/auth/credentials';
+import { env } from '@/lib/env';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { fakeKv } = await vi.hoisted(async () => {
@@ -19,7 +20,7 @@ vi.mock('@simplewebauthn/server', async () => {
   return { ...actual, verifyRegistrationResponse: verifyMock };
 });
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'test-admin-secret';
+const ADMIN_SECRET = env.ADMIN_SECRET;
 const NEW_CREDENTIAL_ID = 'new-cred';
 
 const adminRequest = (body: unknown) =>
