@@ -1,9 +1,8 @@
 'use client';
 
-import { cx } from '@/cva.config';
-import { cva, type VariantProps } from 'cva';
+import { cva, cx, type VariantProps } from '@/cva.config';
 import { Button as BaseButton } from '@base-ui/react';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 
 const iconButton = cva({
   base: [
@@ -27,8 +26,8 @@ const iconButton = cva({
   defaultVariants: { size: 'md', tone: 'default' },
 });
 
-export type IconButtonProps = ComponentProps<typeof BaseButton>
-  & VariantProps<typeof iconButton> & { children?: ReactNode };
+interface IconButtonProps
+  extends ComponentProps<typeof BaseButton>, VariantProps<typeof iconButton> {}
 
 export const IconButton = ({
   className,

@@ -4,6 +4,8 @@
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.2046 0 0);
   --color-background-draw: oklch(0.9735 0.0139 88.68);
+  --color-new-drawing-thumb: oklch(0.9593 0.0265 87.85);
+  --color-new-drawing-thumb-hover: oklch(0.944 0.0278 88.75);
   --color-ivory: oklch(0.9535 0.0131 82.4);
   --color-paper: oklch(0.988 0.0082 91.48);
   --color-ink: oklch(0.2615 0.0117 84.58);
@@ -22,7 +24,7 @@
   --color-cheeto-dust: oklch(0.8043 0.1318 73.35);
 
   /* FIX 1: These were being collapsed onto one line by a missing semicolon. */
-  --color-grid-light: oklch(0.4895 0.0685 72.99 / 7%);
+  --color-grid-light: oklch(0.4895 0.0685 72.99 / 22%);
   --color-new-drawing: oklch(0.3215 0.0117 84.58);
   --shadow-gallery: 0 10px 30px oklch(0.296 0.04381 64.71 / 14%);
   --shadow-button-hover: 0 6px 18px oklch(0.2615 0.0117 84.58 / 28%);
@@ -67,18 +69,3 @@ body {
 .root {
   isolation: isolate;
 }
-
-/*
- * FIX 3: Paper Studio hover system has been deleted from globals.
- * All of these states are now expressed inline with Tailwind utilities in
- * the ui/ primitives (Button, IconButton, Avatar, MenuItem, etc.). This
- * removes the parallel styling system and lets the primitives own their
- * interaction states.
- *
- * Previously this file contained: .ps-ghost-btn, .ps-primary-btn,
- * .ps-link-btn, .ps-avatar, .ps-option-btn, .ps-zoom-pill, .ps-danger-btn,
- * .ps-card, .ps-new-card, .ps-menu-item, .ps-menu-item-danger, .ps-swatch.
- *
- * Keep this file intentionally empty below @theme — Tailwind is the styling
- * system; hover states belong on the components.
- */

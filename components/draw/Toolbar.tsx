@@ -2,19 +2,11 @@
 
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
+import { formatDate } from '@/lib/utils';
 import type { SaveState } from '@/types/drawing';
+import { MoveLeft, Redo2, Save, Share, Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-
-/**
- * Toolbar — top bar of the drawing editor.
- *
- * FIX 2: Share/Save buttons now use <Button>, undo/redo use <IconButton>.
- * FIX 4: title uses text-display-sm instead of inline [21px] / leading / ts.
- *
- * The nested overflow-hidden wrapper around undo+redo is kept so they read
- * as a segmented control.
- */
 
 interface ToolbarProps {
   onRedo: () => void;
@@ -25,54 +17,6 @@ interface ToolbarProps {
   saveState: SaveState;
   title: string;
 }
-
-const SAVE_STATE_LABEL: Record<SaveState, string> = {
-  error: 'Save failed',
-  idle: 'Autosaved',
-  saved: 'Autosaved',
-  saving: 'Saving…',
-};
-
-const formatDate = () =>
-  new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-const UndoIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M9 14L4 9l5-5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M4 9h10a6 6 0 0 1 6 6v1a4 4 0 0 1-4 4h-3"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const RedoIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M15 14l5-5-5-5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20 9H10a6 6 0 0 0-6 6v1a4 4 0 0 0 4 4h3"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export const Toolbar = ({
   onRedo,
@@ -98,13 +42,23 @@ export const Toolbar = ({
     onTitleCommit();
   };
 
+  const saveStateLabel = {
+    error: 'Save failed',
+    idle: 'Autosaved',
+    saved: 'Autosaved',
+    saving: 'Saving…',
+  }[saveState];
+
   return (
     <div className="col-span-full flex h-16 items-center gap-5 border-b border-hair bg-ivory px-7">
       <Link
         className="flex items-center gap-1.5 text-sm text-muted transition-colors duration-150 hover:text-ink"
         href="/draw"
       >
-        <span className="text-base">←</span> Gallery
+        <span className="text-base">
+          <MoveLeft size={14} />
+        </span>{' '}
+        Gallery
       </Link>
       <div className="h-5.5 w-px bg-hair" />
       <div className="flex flex-col leading-[1.15]">
@@ -133,38 +87,38 @@ export const Toolbar = ({
           </button>
         }
         <div className="text-xs tracking-[0.2px] text-muted">
-          {SAVE_STATE_LABEL[saveState]} · {formatDate()}
+          {saveStateLabel} · {formatDate()}
         </div>
       </div>
       <div className="flex-1" />
 
-      <div className="flex overflow-hidden rounded-[10px] border border-hair bg-white">
+      <div className="flex overflow-hidden rounded-lg border border-hair bg-white">
         <IconButton
-          size="lg"
-          tone="default"
-          onClick={onUndo}
-          title="Undo"
           className="rounded-none"
+          onClick={onUndo}
+          size="lg"
+          title="Undo"
+          tone="default"
         >
-          <UndoIcon />
+          <Undo2 size={16} />
         </IconButton>
         <div className="w-px bg-hair" />
         <IconButton
-          size="lg"
-          tone="default"
-          onClick={onRedo}
-          title="Redo"
           className="rounded-none"
+          onClick={onRedo}
+          size="lg"
+          title="Redo"
+          tone="default"
         >
-          <RedoIcon />
+          <Redo2 size={16} />
         </IconButton>
       </div>
 
-      <Button variant="ghost" disabled title="Share (coming soon)">
-        Share
+      <Button title="Share (coming soon)" variant="ghost" disabled>
+        <Share size={14} /> Share
       </Button>
       <Button variant="primary" onClick={onSaveToPhotos}>
-        Save
+        <Save size={14} /> Save
       </Button>
     </div>
   );

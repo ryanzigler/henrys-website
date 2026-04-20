@@ -6,27 +6,27 @@ import { Input } from '@base-ui/react';
 import { useEffect, useRef, useState } from 'react';
 
 interface PromptDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  label?: string;
-  defaultValue?: string;
-  placeholder?: string;
-  confirmLabel?: string;
   cancelLabel?: string;
+  confirmLabel?: string;
+  defaultValue?: string;
+  label?: string;
   onConfirm: (value: string) => void | Promise<void>;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  placeholder?: string;
+  title: string;
 }
 
 export const PromptDialog = ({
-  open,
-  onOpenChange,
-  title,
-  label,
-  defaultValue = '',
-  placeholder,
-  confirmLabel = 'Save',
   cancelLabel = 'Cancel',
+  confirmLabel = 'Save',
+  defaultValue = '',
+  label,
   onConfirm,
+  onOpenChange,
+  open,
+  placeholder,
+  title,
 }: PromptDialogProps) => {
   const [value, setValue] = useState(defaultValue);
   const [pending, setPending] = useState(false);
@@ -77,16 +77,16 @@ export const PromptDialog = ({
             </label>
           )}
           <Input
-            ref={inputRef}
             className="h-10 w-full rounded-lg border border-hair bg-white px-3 text-sm text-ink outline-none focus:border-ink"
-            value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={placeholder}
+            ref={inputRef}
+            value={value}
           />
           <Dialog.Footer>
             <Dialog.Close
               render={
-                <Button variant="ghost" type="button">
+                <Button type="button" variant="ghost">
                   {cancelLabel}
                 </Button>
               }

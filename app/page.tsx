@@ -1,21 +1,6 @@
 import { FeatureTile } from '@/components/hub/FeatureTile';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 
-/**
- * Hub page.
- *
- * FIX 5A: reskinned to read as the Paper Studio product shelf rather than
- * "two tiles on a sky-blue body". The hub now:
- *   - sits on --color-canvas (matches the gallery background),
- *   - has a display-lg greeting using the session's display name,
- *   - uses a responsive grid (1 → 2 → 3 columns),
- *   - shows the reskinned FeatureTile cards for Draw + placeholders.
- *
- * FIX 5B (conservative): added one disabled "Coming soon" tile so the hub
- * visibly implies there's more than /draw. Delete if you don't want that.
- *
- * NOTE: relies on layout.tsx's bg change from bg-sky-50 → bg-canvas.
- */
 const HubPage = async () => {
   const session = await getSessionFromCookie();
   const name = session?.displayName ?? 'there';

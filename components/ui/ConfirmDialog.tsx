@@ -2,29 +2,29 @@
 
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
-import { useCallback, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 interface ConfirmDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  description?: ReactNode;
-  confirmLabel?: string;
   cancelLabel?: string;
+  confirmLabel?: string;
+  description?: ReactNode;
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  title: string;
 }
 
 export const ConfirmDialog = ({
-  open,
-  onOpenChange,
-  title,
-  description,
-  confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
+  confirmLabel = 'Confirm',
+  description,
   destructive = false,
   onConfirm,
+  onOpenChange,
+  open,
+  title,
 }: ConfirmDialogProps) => {
   const [pending, setPending] = useState(false);
 
@@ -58,53 +58,4 @@ export const ConfirmDialog = ({
       </Dialog.Content>
     </Dialog.Root>
   );
-};
-
-/**
- * useConfirm — gives you an imperative `confirm()` that returns a Promise<boolean>.
- * Drop <confirmDialog /> somewhere in the tree and call confirm() from anywhere.
- *
- *   const { confirm, confirmDialog } = useConfirm();
- *   ...
- *   if (await confirm({ title: 'Delete?', destructive: true })) { ... }
- *   return <>...{confirmDialog}</>;
- */
-export const useConfirm = () => {
-  const [state, setState] = useState<null | Omit<
-    ConfirmDialogProps,
-    'open' | 'onOpenChange' | 'onConfirm'
-  >>(null);
-  const resolveRef = useRef<((v: boolean) => void) | null>(null);
-
-  const confirm = useCallback(
-    (opts: Omit<ConfirmDialogProps, 'open' | 'onOpenChange' | 'onConfirm'>) =>
-      new Promise<boolean>((resolve) => {
-        resolveRef.current = resolve;
-        setState(opts);
-      }),
-    [],
-  );
-
-  const onOpenChange = (next: boolean) => {
-    if (!next) {
-      resolveRef.current?.(false);
-      resolveRef.current = null;
-      setState(null);
-    }
-  };
-
-  const confirmDialog =
-    state ?
-      <ConfirmDialog
-        {...state}
-        open
-        onOpenChange={onOpenChange}
-        onConfirm={() => {
-          resolveRef.current?.(true);
-          resolveRef.current = null;
-        }}
-      />
-    : null;
-
-  return { confirm, confirmDialog };
 };

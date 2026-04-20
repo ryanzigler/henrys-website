@@ -4,9 +4,10 @@ import { cx } from '@/cva.config';
 import { Switch as BaseSwitch } from '@base-ui/react';
 import type { ComponentProps } from 'react';
 
-export type SwitchProps = ComponentProps<typeof BaseSwitch.Root>;
-
-export const Switch = ({ className, ...rest }: SwitchProps) => (
+export const Switch = ({
+  className,
+  ...rest
+}: ComponentProps<typeof BaseSwitch.Root>) => (
   <BaseSwitch.Root
     className={cx(
       'relative inline-block h-5 w-8.5 shrink-0 rounded-full bg-hair transition-colors duration-150',

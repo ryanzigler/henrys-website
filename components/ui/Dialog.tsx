@@ -4,10 +4,6 @@ import { cx } from '@/cva.config';
 import { Dialog as BaseDialog } from '@base-ui/react';
 import type { ReactNode } from 'react';
 
-const Root = BaseDialog.Root;
-const Trigger = BaseDialog.Trigger;
-const Close = BaseDialog.Close;
-
 const Backdrop = ({ className }: { className?: string }) => (
   <BaseDialog.Backdrop
     className={cx(
@@ -78,11 +74,11 @@ const Footer = ({ children }: { children: ReactNode }) => (
 );
 
 export const Dialog = {
-  Root,
-  Trigger,
-  Close,
+  Close: BaseDialog.Close,
   Content,
-  Title,
   Description,
   Footer,
+  Root: BaseDialog.Root,
+  Title,
+  Trigger: BaseDialog.Trigger,
 };
