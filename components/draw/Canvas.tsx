@@ -55,7 +55,7 @@ export const Canvas = ({
   controls,
   onDirtyChange,
   onSaveStateChange,
-  paperColor = '#FDFBF5',
+  paperColor = 'var(--color-paper)',
   showGrid = false,
   ref,
 }: CanvasProps) => {
@@ -317,7 +317,7 @@ export const Canvas = ({
     ],
   );
 
-  const isDarkPaper = paperColor === '#2B2A2E';
+  const isDarkPaper = paperColor === 'var(--color-paper-slate)';
 
   return (
     <div
@@ -330,13 +330,13 @@ export const Canvas = ({
         <div
           aria-hidden
           className={cx(
-            'from-grid-light pointer-events-none absolute inset-0 bg-radial from-[1.2px] to-transparent to-[1.4px] bg-size-[18px_18px]',
-            isDarkPaper && 'from-black/8',
+            'pointer-events-none absolute inset-0 bg-radial from-grid-light from-[1.2px] to-transparent to-[1.4px] bg-size-[18px_18px]',
+            isDarkPaper && 'from-white/22',
           )}
         />
       )}
       <canvas
-        className="relative block cursor-none touch-none"
+        className="relative block h-400 w-300 cursor-none touch-none"
         onPointerCancel={onPointerUp}
         onPointerDown={onPointerDown}
         onPointerEnter={onPointerEnter}
@@ -344,15 +344,14 @@ export const Canvas = ({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         ref={canvasRef}
-        style={{ width: LOGICAL_WIDTH, height: LOGICAL_HEIGHT }}
       />
       {cursor && (
         <div
           aria-hidden
           className={cx(
-            'shadow-brush-cursor-light pointer-events-none absolute -translate-1/2 rounded-full border-[1.5px] border-ink/55',
+            'pointer-events-none absolute -translate-1/2 rounded-full border-[1.5px] border-ink/55 shadow-brush-cursor-light',
             {
-              'shadow-brush-cursor-dark border-white/75 bg-white': isDarkPaper,
+              'border-white/75 bg-white shadow-brush-cursor-dark': isDarkPaper,
             },
           )}
           style={{

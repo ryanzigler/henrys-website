@@ -1,4 +1,5 @@
-import { SignOutButton } from '@/components/auth/SignOutButton';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { initialsOf } from '@/lib/auth/identity';
 import { getSessionFromCookie } from '@/lib/auth/sessions';
 
 export const UserPill = async () => {
@@ -6,9 +7,10 @@ export const UserPill = async () => {
   if (!session) return null;
 
   return (
-    <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow">
-      <span className="text-xl">{session.emoji}</span>
-      <SignOutButton />
-    </div>
+    <UserMenu
+      displayName={session.displayName}
+      initials={initialsOf(session.displayName)}
+      emoji={session.emoji}
+    />
   );
 };

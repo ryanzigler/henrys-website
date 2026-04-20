@@ -17,37 +17,30 @@ interface EditorProps {
   drawing: Drawing;
 }
 
-const DEFAULT_CONTROLS: StrokeControlsType = {
-  brush: 'pen',
-  color: '#E86F5A',
-  opacity: 1,
-  size: 6,
-};
-
-const MAX_RECENT_COLORS = 5;
-
-const ZOOM_STEPS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3] as const;
-const DEFAULT_ZOOM_INDEX = 3;
-
 export const Editor = ({ drawing }: EditorProps) => {
   const canvasRef = useRef<CanvasHandle | null>(null);
   const [title, setTitle] = useState(drawing.title);
   const [saveState, setSaveState] = useState<SaveState>('idle');
-  const [controls, setControls] =
-    useState<StrokeControlsType>(DEFAULT_CONTROLS);
   const [recentColors, setRecentColors] = useState<string[]>([]);
-  const [paperColor, setPaperColor] = useState('#FDFBF5');
+  const [paperColor, setPaperColor] = useState('var(--color-paper)');
   const [showGrid, setShowGrid] = useState(true);
   const [paperOpen, setPaperOpen] = useState(false);
-  const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
+  const [zoomIndex, setZoomIndex] = useState(3);
+  const [controls, setControls] = useState<StrokeControlsType>({
+    brush: 'pen',
+    color: 'oklch(0.6811 0.1545 31.48)',
+    opacity: 1,
+    size: 6,
+  });
 
-  const zoom = ZOOM_STEPS[zoomIndex];
+  const zoomSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3] as const;
+  const zoom = zoomSteps[zoomIndex];
   const canZoomOut = zoomIndex > 0;
-  const canZoomIn = zoomIndex < ZOOM_STEPS.length - 1;
+  const canZoomIn = zoomIndex < zoomSteps.length - 1;
 
   const zoomOut = () => setZoomIndex((index) => Math.max(0, index - 1));
   const zoomIn = () =>
-    setZoomIndex((index) => Math.min(ZOOM_STEPS.length - 1, index + 1));
+    setZoomIndex((index) => Math.min(zoomSteps.length - 1, index + 1));
 
   const updateControl = <TKey extends keyof StrokeControlsType>(
     key: TKey,
@@ -57,10 +50,7 @@ export const Editor = ({ drawing }: EditorProps) => {
   const chooseColor = (chosen: string) => {
     updateControl('color', chosen);
     setRecentColors((previous) =>
-      [chosen, ...previous.filter((other) => other !== chosen)].slice(
-        0,
-        MAX_RECENT_COLORS,
-      ),
+      [chosen, ...previous.filter((other) => other !== chosen)].slice(0, 5),
     );
   };
 
@@ -86,13 +76,7 @@ export const Editor = ({ drawing }: EditorProps) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid overflow-hidden bg-ivory font-sans text-ink"
-      style={{
-        gridTemplateColumns: '1fr 280px',
-        gridTemplateRows: '64px 1fr',
-      }}
-    >
+    <div className="fixed inset-0 z-50 grid grid-cols-[1fr_280px] grid-rows-[64px_1fr] overflow-hidden bg-ivory font-sans text-ink">
       <Toolbar
         onRedo={() => canvasRef.current?.redo()}
         onSaveToPhotos={onSaveToPhotos}
@@ -103,12 +87,10 @@ export const Editor = ({ drawing }: EditorProps) => {
         title={title}
       />
 
-      <div className="relative flex items-center justify-center overflow-hidden bg-canvas p-12">
+      <div className="relative flex origin-center items-center justify-center overflow-hidden bg-canvas p-12 transition-transform duration-120">
         <div
           style={{
             transform: `scale(${zoom})`,
-            transformOrigin: 'center center',
-            transition: 'transform 120ms ease',
           }}
         >
           <Canvas

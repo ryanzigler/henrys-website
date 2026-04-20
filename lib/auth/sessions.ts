@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { env } from '@/lib/env';
 import { kv } from '@/lib/kv';
@@ -16,7 +17,9 @@ export interface SessionRecord {
 const sessionKey = (id: string) => `session:${id}`;
 
 const sign = (value: string) =>
-  createHmac('sha256', env.AUTH_COOKIE_SECRET).update(value).digest('base64url');
+  createHmac('sha256', env.AUTH_COOKIE_SECRET)
+    .update(value)
+    .digest('base64url');
 
 const signedCookieValue = (sessionId: string) =>
   `${sessionId}.${sign(sessionId)}`;
@@ -101,7 +104,7 @@ export const getSessionIdFromCookie = async () => {
   return verifyCookieValue(jar.get(SESSION_COOKIE_NAME)?.value);
 };
 
-export const getSessionFromCookie = async () => {
+export const getSessionFromCookie = cache(async () => {
   const sessionId = await getSessionIdFromCookie();
   return sessionId ? getSession(sessionId) : null;
-};
+});

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
   <html lang="en" className={`${manrope.variable} ${newsreader.variable}`}>
-    <body className="relative min-h-screen bg-sky-50 font-sans">
+    <body className="relative min-h-screen bg-canvas font-sans text-ink">
       <div className="root">
         <header className="flex items-center justify-end p-4">
           <UserPill />
