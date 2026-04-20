@@ -76,7 +76,7 @@ const Header = ({
 }) => (
   <div
     className={cx(
-      'px-2.5 pt-2 pb-1.5 text-xs font-bold tracking-[1.4px] text-muted uppercase',
+      'px-2.5 pt-2 pb-1.5 text-xs font-bold tracking-widest text-muted uppercase',
       className,
     )}
   >

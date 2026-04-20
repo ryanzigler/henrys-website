@@ -37,7 +37,7 @@ export const NewDrawingCard = () => {
         </div>
       </div>
       <div className="px-4 py-3.5">
-        <div className="font-display text-lg font-medium tracking-[-0.2px] whitespace-nowrap text-ink">
+        <div className="tracking-tightest font-display text-lg font-medium whitespace-nowrap text-ink">
           {creating ? 'Creating…' : 'New drawing'}
         </div>
         <div className="mt-0.5 text-xs text-muted">

@@ -24,7 +24,7 @@ export const UserMenu = ({ displayName, initials, emoji }: UserMenuProps) => {
       >
         <Avatar initials={initials} interactive />
       </Menu.Trigger>
-      <Menu.Popup width="w-56" align="end" sideOffset={8}>
+      <Menu.Popup align="end" className="w-56" sideOffset={8}>
         <Menu.Header>Signed in as</Menu.Header>
         <Menu.Label className="flex items-center gap-2 pt-0 pb-2 font-medium">
           {emoji && (

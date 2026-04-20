@@ -72,7 +72,7 @@ export const PromptDialog = ({
           }}
         >
           {label && (
-            <label className="mb-2 block text-xs font-bold tracking-[1.4px] text-muted uppercase">
+            <label className="mb-2 block text-xs font-bold tracking-widest text-muted uppercase">
               {label}
             </label>
           )}

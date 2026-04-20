@@ -131,7 +131,7 @@ export const BrushRail = ({
             aria-label="Paper"
             className="absolute top-[calc(100%+0.625rem)] right-0 z-20 w-60 rounded-2xl border border-hair bg-white p-3.5 shadow-paper-dialog"
           >
-            <div className="mb-2.5 text-xs font-bold tracking-[1.4px] text-muted uppercase">
+            <div className="mb-2.5 text-xs font-bold tracking-widest text-muted uppercase">
               Paper color
             </div>
             <div className="grid grid-cols-6 gap-1.5">

@@ -23,6 +23,18 @@
   --color-salmon: oklch(0.6811 0.1545 31.48);
   --color-cheeto-dust: oklch(0.8043 0.1318 73.35);
 
+  --color-palette-charcoal: oklch(0.2615 0.0117 84.58);
+  --color-palette-white: oklch(1 0 0);
+  --color-palette-salmon: oklch(0.6811 0.1545 31.48);
+  --color-palette-marigold: oklch(0.8043 0.1318 73.35);
+  --color-palette-dandelion: oklch(0.8785 0.1304 94.9);
+  --color-palette-sage: oklch(0.7346 0.0989 137.37);
+  --color-palette-mist: oklch(0.7277 0.073 215.44);
+  --color-palette-cornflower: oklch(0.5998 0.1188 263.78);
+  --color-palette-lavender: oklch(0.6392 0.0996 311.74);
+  --color-palette-blush: oklch(0.7217 0.1002 348.13);
+  --color-palette-walnut: oklch(0.5938 0.0677 64.33);
+
   /* FIX 1: These were being collapsed onto one line by a missing semicolon. */
   --color-grid-light: oklch(0.4895 0.0685 72.99 / 22%);
   --color-new-drawing: oklch(0.3215 0.0117 84.58);
@@ -53,6 +65,10 @@
   --text-display-lg--line-height: 1.05;
   --text-display-lg--letter-spacing: -0.8px;
   --text-display-lg--font-weight: 500;
+
+  --tracking-tighest: -0.0125em;
+  --tracking-relaxed: 0.0125em;
+  --tracking-widest: 0.0875em;
 }
 
 @theme inline {

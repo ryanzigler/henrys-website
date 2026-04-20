@@ -24,7 +24,7 @@ export const GalleryTile = ({ meta }: { meta: DrawingMeta }) => (
         </div>
         <div className="flex items-center justify-between gap-2.5 px-4 py-3.5">
           <div className="min-w-0">
-            <div className="overflow-hidden font-display text-lg font-medium tracking-[-0.2px] overflow-ellipsis whitespace-nowrap text-ink">
+            <div className="tracking-tightest overflow-hidden font-display text-lg font-medium overflow-ellipsis whitespace-nowrap text-ink">
               {meta.title}
             </div>
             <div className="mt-0.5 text-xs text-muted">

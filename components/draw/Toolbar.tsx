@@ -61,7 +61,7 @@ export const Toolbar = ({
         Gallery
       </Link>
       <div className="h-5.5 w-px bg-hair" />
-      <div className="flex flex-col leading-[1.15]">
+      <div className="flex flex-col">
         {editing ?
           <input
             aria-label="title"
@@ -86,7 +86,7 @@ export const Toolbar = ({
             {title}
           </button>
         }
-        <div className="text-xs tracking-[0.2px] text-muted">
+        <div className="text-xs tracking-relaxed text-muted">
           {saveStateLabel} · {formatDate()}
         </div>
       </div>

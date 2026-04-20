@@ -6,21 +6,41 @@ import { cx } from '@/cva.config';
 import type { Brush } from '@/types/drawing';
 import { Button as BaseButton } from '@base-ui/react';
 import { Trash2 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState, useSyncExternalStore, type ReactNode } from 'react';
 
-const PALETTE = [
-  '#27241E',
-  '#FFFFFF',
-  '#E86F5A',
-  '#F2B155',
-  '#F2D66B',
-  '#8BB87A',
-  '#6FB3C4',
-  '#5B7EC7',
-  '#A07AB8',
-  '#D48BB0',
-  '#9B7653',
-];
+const PALETTE_TOKENS = [
+  'charcoal',
+  'white',
+  'salmon',
+  'marigold',
+  'dandelion',
+  'sage',
+  'mist',
+  'cornflower',
+  'lavender',
+  'blush',
+  'walnut',
+] as const;
+
+const EMPTY_PALETTE: Record<string, string> = {};
+let cachedPalette: Record<string, string> | null = null;
+
+const getClientPalette = () => {
+  if (cachedPalette) {
+    return cachedPalette;
+  }
+
+  const style = getComputedStyle(document.documentElement);
+
+  cachedPalette = Object.fromEntries(
+    PALETTE_TOKENS.map((token) => [
+      token,
+      style.getPropertyValue(`--color-palette-${token}`).trim(),
+    ]),
+  );
+
+  return cachedPalette;
+};
 
 interface StrokeControlsProps {
   color: string;
@@ -42,7 +62,13 @@ export const StrokeControls = ({
   tool,
 }: StrokeControlsProps) => {
   const [clearOpen, setClearOpen] = useState(false);
+  const paletteValues = useSyncExternalStore(
+    () => () => {},
+    getClientPalette,
+    () => EMPTY_PALETTE,
+  );
   const isEraser = tool === 'eraser';
+
   const previewDiameter = Math.min(28, Math.max(4, size * 0.8));
 
   const sizePresets = [3, 6, 12, 20, 30];
@@ -59,7 +85,7 @@ export const StrokeControls = ({
       <Section label="Tool">
         <div className="flex flex-col items-baseline justify-between gap-1">
           <div className="font-display text-display-md capitalize">{tool}</div>
-          <div className="max-w-57.75 text-xs leading-[1.3] text-muted">
+          <div className="max-w-57.75 text-xs leading-4 text-muted">
             {toolHints}
           </div>
         </div>
@@ -70,7 +96,7 @@ export const StrokeControls = ({
           label="Color"
           aside={
             <label
-              className="relative inline-flex cursor-pointer items-center gap-1 text-xs font-semibold tracking-[0.8px] text-muted uppercase transition-colors duration-150 hover:text-ink"
+              className="relative inline-flex cursor-pointer items-center gap-1 text-xs font-semibold tracking-wider text-muted uppercase transition-colors duration-150 hover:text-ink"
               title="Custom color"
             >
               <span aria-hidden>◉</span> Pick
@@ -85,27 +111,36 @@ export const StrokeControls = ({
           }
         >
           <div className="grid grid-cols-6 gap-2">
-            {PALETTE.map((presetColor) => (
-              <BaseButton
-                key={presetColor}
-                aria-label={presetColor}
-                className={cx(
-                  'aspect-square rounded-full p-0 outline-offset-2 transition-[transform,box-shadow] duration-150 outline-none hover:scale-110 hover:shadow-swatch',
-                  color === presetColor && 'outline-2 outline-ink',
-                  presetColor === '#FFFFFF' && 'border border-hair',
-                )}
-                onClick={() => onColorChange(presetColor)}
-                style={{
-                  background: presetColor,
-                }}
-              />
-            ))}
+            {PALETTE_TOKENS.map((token) => {
+              const resolved = paletteValues[token];
+
+              return (
+                <BaseButton
+                  key={token}
+                  aria-label={token}
+                  className={cx(
+                    'aspect-square rounded-full p-0 outline-offset-2 transition-[transform,box-shadow] duration-150 outline-none hover:scale-110 hover:shadow-swatch',
+                    resolved
+                      && color.toLowerCase() === resolved.toLowerCase()
+                      && 'outline-2 outline-ink',
+                    token === 'white' && 'border border-hair',
+                  )}
+                  disabled={!resolved}
+                  onClick={() => resolved && onColorChange(resolved)}
+                  style={{
+                    background: `var(--color-palette-${token})`,
+                  }}
+                />
+              );
+            })}
           </div>
           <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-hair bg-white px-2.5 py-2">
             <div
               className={cx(
                 'size-5.5 rounded-md',
-                color === '#FFFFFF' && 'border border-hair',
+                paletteValues.white
+                  && color.toLowerCase() === paletteValues.white.toLowerCase()
+                  && 'border border-hair',
               )}
               style={{
                 background: color,
@@ -185,20 +220,26 @@ export const StrokeControls = ({
       {!isEraser && recentColors.length > 0 && (
         <Section label="Recent">
           <div className="flex gap-2">
-            {recentColors.map((recent) => (
-              <BaseButton
-                key={recent}
-                aria-label={recent}
-                onClick={() => onColorChange(recent)}
-                className={cx(
-                  'aspect-square size-7 rounded-full border-none p-0 transition-[transform,box-shadow] duration-150 hover:scale-110 hover:shadow-swatch',
-                  recent === '#FFFFFF' && 'border border-hair',
-                )}
-                style={{
-                  background: recent,
-                }}
-              />
-            ))}
+            {recentColors.map((recent) => {
+              const isWhite =
+                paletteValues.white
+                && recent.toLowerCase() === paletteValues.white.toLowerCase();
+
+              return (
+                <BaseButton
+                  key={recent}
+                  aria-label={recent}
+                  onClick={() => onColorChange(recent)}
+                  className={cx(
+                    'aspect-square size-7 rounded-full border-none p-0 transition-[transform,box-shadow] duration-150 hover:scale-110 hover:shadow-swatch',
+                    isWhite && 'border border-hair',
+                  )}
+                  style={{
+                    background: recent,
+                  }}
+                />
+              );
+            })}
           </div>
         </Section>
       )}
@@ -232,7 +273,7 @@ function Section({ aside, children, label }: SectionProps) {
   return (
     <div>
       <div className="mb-2.5 flex items-baseline justify-between">
-        <div className="text-xs font-bold tracking-[1.4px] text-muted uppercase">
+        <div className="text-xs font-bold tracking-widest text-muted uppercase">
           {label}
         </div>
         {aside}

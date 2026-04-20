@@ -60,7 +60,7 @@ export const FeatureTile = ({
       </div>
 
       {disabled && comingSoonLabel && (
-        <span className="absolute top-4 right-4 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold tracking-[0.8px] text-muted uppercase">
+        <span className="absolute top-4 right-4 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold tracking-wider text-muted uppercase">
           {comingSoonLabel}
         </span>
       )}

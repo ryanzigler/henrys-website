@@ -28,7 +28,7 @@ export const Editor = ({ drawing }: EditorProps) => {
   const [zoomIndex, setZoomIndex] = useState(3);
   const [controls, setControls] = useState<StrokeControlsType>({
     brush: 'pen',
-    color: '#E86F5A',
+    color: 'oklch(0.6811 0.1545 31.48)',
     opacity: 1,
     size: 6,
   });
