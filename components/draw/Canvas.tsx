@@ -1,5 +1,6 @@
 'use client';
 
+import { cx } from '@/cva.config';
 import {
   canvasToPngBlob,
   canvasToPngDataUrl,
@@ -14,6 +15,7 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
   type RefObject,
 } from 'react';
 
@@ -42,6 +44,8 @@ interface CanvasProps {
   initialStrokes: Stroke[];
   onDirtyChange?: (dirty: boolean) => void;
   onSaveStateChange?: (state: SaveState) => void;
+  paperColor?: string;
+  showGrid?: boolean;
   ref: RefObject<CanvasHandle | null>;
 }
 
@@ -51,6 +55,8 @@ export const Canvas = ({
   controls,
   onDirtyChange,
   onSaveStateChange,
+  paperColor = '#FDFBF5',
+  showGrid = false,
   ref,
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,6 +65,7 @@ export const Canvas = ({
   const redoRef = useRef<Stroke[]>([]);
   const liveRef = useRef<Stroke | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const clearContext = (
     canvas: HTMLCanvasElement,
@@ -194,8 +201,14 @@ export const Canvas = ({
     return [x, y, pressure];
   };
 
+  const updateCursor = (event: React.PointerEvent) => {
+    const [x, y] = pointerPos(event);
+    setCursor({ x, y });
+  };
+
   const onPointerDown = (event: React.PointerEvent) => {
     event.currentTarget.setPointerCapture(event.pointerId);
+    updateCursor(event);
 
     liveRef.current = {
       brush: controls.brush,
@@ -209,6 +222,8 @@ export const Canvas = ({
   };
 
   const onPointerMove = (event: React.PointerEvent) => {
+    updateCursor(event);
+
     if (!liveRef.current) {
       return;
     }
@@ -217,19 +232,31 @@ export const Canvas = ({
     paintLive();
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (event: React.PointerEvent) => {
     const committed = liveRef.current;
-    if (!committed) {
-      return;
+    if (committed) {
+      strokesRef.current.push(committed);
+      redoRef.current.length = 0;
+      liveRef.current = null;
+      appendToBaseline(committed);
+      onDirtyChange?.(true);
+      scheduleAutosave();
+      paintLive();
     }
 
-    strokesRef.current.push(committed);
-    redoRef.current.length = 0;
-    liveRef.current = null;
-    appendToBaseline(committed);
-    onDirtyChange?.(true);
-    scheduleAutosave();
-    paintLive();
+    if (event.pointerType !== 'mouse') {
+      setCursor(null);
+    }
+  };
+
+  const onPointerEnter = (event: React.PointerEvent) => {
+    updateCursor(event);
+  };
+
+  const onPointerLeave = () => {
+    if (!liveRef.current) {
+      setCursor(null);
+    }
   };
 
   useImperativeHandle(
@@ -290,15 +317,52 @@ export const Canvas = ({
     ],
   );
 
+  const isDarkPaper = paperColor === '#2B2A2E';
+
   return (
-    <canvas
-      className="touch-none rounded-lg bg-white shadow-lg"
-      onPointerCancel={onPointerUp}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      ref={canvasRef}
-      style={{ width: LOGICAL_WIDTH, height: LOGICAL_HEIGHT }}
-    />
+    <div
+      className="relative h-400 w-300 overflow-hidden rounded-sm shadow-canvas transition-[background] duration-200"
+      style={{
+        background: paperColor,
+      }}
+    >
+      {showGrid && (
+        <div
+          aria-hidden
+          className={cx(
+            'from-grid-light pointer-events-none absolute inset-0 bg-radial from-[1.2px] to-transparent to-[1.4px] bg-size-[18px_18px]',
+            isDarkPaper && 'from-black/8',
+          )}
+        />
+      )}
+      <canvas
+        className="relative block cursor-none touch-none"
+        onPointerCancel={onPointerUp}
+        onPointerDown={onPointerDown}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        ref={canvasRef}
+        style={{ width: LOGICAL_WIDTH, height: LOGICAL_HEIGHT }}
+      />
+      {cursor && (
+        <div
+          aria-hidden
+          className={cx(
+            'shadow-brush-cursor-light pointer-events-none absolute -translate-1/2 rounded-full border-[1.5px] border-ink/55',
+            {
+              'shadow-brush-cursor-dark border-white/75 bg-white': isDarkPaper,
+            },
+          )}
+          style={{
+            left: cursor.x,
+            top: cursor.y,
+            width: controls.size,
+            height: controls.size,
+          }}
+        />
+      )}
+    </div>
   );
 };

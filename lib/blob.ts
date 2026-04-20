@@ -15,6 +15,7 @@ export interface BlobPutResult {
 
 export interface BlobStore {
   del: (url: string) => Promise<void>;
+  getBytes: (url: string) => Promise<Uint8Array>;
   getText: (url: string) => Promise<string>;
   put: (
     pathname: string,
@@ -23,17 +24,23 @@ export interface BlobStore {
   ) => Promise<BlobPutResult>;
 }
 
+const fetchPrivateBlob = async (url: string) => {
+  const result = await vercelGet(url, { access: 'private' });
+  if (!result || result.statusCode !== 200) {
+    throw new Error(`blob fetch failed (${result?.statusCode ?? 404})`);
+  }
+  return result.stream;
+};
+
 export const blobStore: BlobStore = {
   del: async (url) => {
     await vercelDel(url);
   },
-  getText: async (url) => {
-    const result = await vercelGet(url, { access: 'private' });
-    if (!result || result.statusCode !== 200) {
-      throw new Error(`blob fetch failed (${result?.statusCode ?? 404})`);
-    }
-    return new Response(result.stream).text();
-  },
+  getBytes: async (url) =>
+    new Uint8Array(
+      await new Response(await fetchPrivateBlob(url)).arrayBuffer(),
+    ),
+  getText: async (url) => new Response(await fetchPrivateBlob(url)).text(),
   put: async (pathname, body, opts) => {
     const { url, pathname: storedPath } = await vercelPut(
       pathname,
